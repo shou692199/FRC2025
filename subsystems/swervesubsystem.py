@@ -6,7 +6,7 @@ from typing import Iterable
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
-from wpilib import SmartDashboard, DriverStation, reportError
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
