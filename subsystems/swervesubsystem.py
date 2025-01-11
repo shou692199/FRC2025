@@ -6,7 +6,7 @@ from typing import Iterable
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
-from wpilib import SmartDashboard, DriverStation, reportWarning
+from wpilib import SmartDashboard, DriverStation, reportError
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
@@ -50,25 +50,21 @@ class SwerveSubsystem(commands2.Subsystem):
       DriveConstants.kDriveKinematics, Rotation2d(0), self.getModulePositions()
     )
 
-    #threading.Thread(target=self.zeroHeading, args=(1,)).start()
-    self.zeroHeading()
+    AutoBuilder.configure(
+      self.getPose,
+      self.resetOdometry,
+      self.getChassisSpeeds,
+      lambda speed, feed: self.driveRobotRelative(speed),
+      PPHolonomicDriveController(PIDConstants(5), PIDConstants(5)),
+      DriveConstants.kRobotConfig,
+      self.shouldFlipPath,
+      self
+    )
+    
+    threading.Thread(target=self.zeroHeading, args=(1,)).start()
 
-    reportWarning("hello0")
-    if not AutoBuilder.isConfigured():
-      AutoBuilder.configure(
-        self.getPose,
-        self.resetOdometry,
-        self.getChassisSpeeds,
-        lambda speed, feed: self.driveRobotRelative(speed),
-        PPHolonomicDriveController(PIDConstants(5), PIDConstants(5)),
-        DriveConstants.kRobotConfig,
-        self.shouldFlipPath,
-        self
-      )
-
-    reportWarning("hello1")
-
-  def zeroHeading(self):
+  def zeroHeading(self, delay: int = 0):
+    time.sleep(delay)
     self.gyro.reset()
   
   def resetOdometry(self, pose: Pose2d):
@@ -85,10 +81,10 @@ class SwerveSubsystem(commands2.Subsystem):
   def getPose(self):
     return self.odometer.getPose()
   
-  def getModulePositions(self) -> tuple:
+  def getModulePositions(self):
     return tuple(m.getModulePosition() for m in self.modules)
   
-  def getModuleStates(self) -> tuple:
+  def getModuleStates(self):
     return tuple(m.getModuleState() for m in self.modules)
   
   def setModuleStates(self, desiredState: Iterable[SwerveModuleState]):

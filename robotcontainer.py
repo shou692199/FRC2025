@@ -12,8 +12,8 @@ class RobotContainer:
 
     self.configureButtonBindings()
 
-    #self.autoChooser = AutoBuilder.buildAutoChooser()
-    #SmartDashboard.putData("Auto Chooser", self.autoChooser)
+    self.autoChooser = AutoBuilder.buildAutoChooser()
+    SmartDashboard.putData("Auto Chooser", self.autoChooser)
 
     self.swerve.setDefaultCommand(
       DefaultDrive(
@@ -29,4 +29,4 @@ class RobotContainer:
     pass
 
   def getAutonomousCommand(self) -> Command:
-    return None#self.autoChooser.getSelected()
+    return self.autoChooser.getSelected()
