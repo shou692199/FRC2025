@@ -1,4 +1,4 @@
-import threading
+#import threading
 import time
 import math
 import commands2
@@ -6,7 +6,7 @@ from typing import Iterable
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
-from wpilib import DriverStation
+from wpilib import DriverStation, reportWarning
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
@@ -49,31 +49,34 @@ class SwerveSubsystem(commands2.Subsystem):
     self.odometer = SwerveDrive4Odometry(
       DriveConstants.kDriveKinematics, Rotation2d(0), self.getModulePositions()
     )
+    self.cachedHeading = float(0)
 
-    AutoBuilder.configure(
-      self.getPose,
-      self.resetOdometry,
-      self.getChassisSpeeds,
-      lambda speed, feed: self.driveRobotRelative(speed),
-      PPHolonomicDriveController(PIDConstants(5), PIDConstants(5)),
-      DriveConstants.kRobotConfig,
-      self.shouldFlipPath,
-      self
-    )
+    if AutoBuilder.isConfigured():
+      reportWarning("AutoBuilder has already been configured. Are you running pyfrc tests?")
+    else:
+      AutoBuilder.configure(
+        self.getPose,
+        self.resetOdometry,
+        self.getChassisSpeeds,
+        lambda speed, feed: self.driveRobotRelative(speed),
+        PPHolonomicDriveController(PIDConstants(5), PIDConstants(5)),
+        DriveConstants.kRobotConfig,
+        self.shouldFlipPath,
+        self
+      )
     
-    threading.Thread(target=self.zeroHeading, args=(1,)).start()
+    #threading.Thread(target=self.zeroHeading, args=(1,)).start()
 
-  def zeroHeading(self, delay: int = 0):
-    time.sleep(delay)
+  def zeroHeading(self):
     self.gyro.reset()
   
   def resetOdometry(self, pose: Pose2d):
     self.odometer.resetPosition(self.getRotation2d(), self.getModulePositions(), pose)
 
-  def getHeading(self) -> float:
-    if self.gyro.isCalibrating():
-      return 0
-    return -math.remainder(self.gyro.getAngle(), 360)
+  def getHeading(self):
+    if not self.gyro.isCalibrating():
+      self.cachedHeading = -math.remainder(self.gyro.getAngle(), 360)
+    return self.cachedHeading
   
   def getRotation2d(self):
     return Rotation2d.fromDegrees(self.getHeading())

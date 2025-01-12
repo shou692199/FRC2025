@@ -1,3 +1,5 @@
 **/__pycache__
 .pytest_cache
 **/ctre_sim
+simgui*.json
+networktables.json
