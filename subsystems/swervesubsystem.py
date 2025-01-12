@@ -1,12 +1,7 @@
-#import threading
-import time
 import math
 import commands2
 from typing import Iterable
-from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.config import PIDConstants
-from wpilib import DriverStation, reportWarning
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
@@ -49,34 +44,17 @@ class SwerveSubsystem(commands2.Subsystem):
     self.odometer = SwerveDrive4Odometry(
       DriveConstants.kDriveKinematics, Rotation2d(0), self.getModulePositions()
     )
-    self.cachedHeading = float(0)
-
-    if AutoBuilder.isConfigured():
-      reportWarning("AutoBuilder has already been configured. Are you running pyfrc tests?")
-    else:
-      AutoBuilder.configure(
-        self.getPose,
-        self.resetOdometry,
-        self.getChassisSpeeds,
-        lambda speed, feed: self.driveRobotRelative(speed),
-        PPHolonomicDriveController(PIDConstants(5), PIDConstants(5)),
-        DriveConstants.kRobotConfig,
-        self.shouldFlipPath,
-        self
-      )
     
-    #threading.Thread(target=self.zeroHeading, args=(1,)).start()
+    self.zeroHeading()
 
   def zeroHeading(self):
-    self.gyro.reset()
+    self.gyro.zeroYaw()
   
   def resetOdometry(self, pose: Pose2d):
     self.odometer.resetPosition(self.getRotation2d(), self.getModulePositions(), pose)
 
   def getHeading(self):
-    if not self.gyro.isCalibrating():
-      self.cachedHeading = -math.remainder(self.gyro.getAngle(), 360)
-    return self.cachedHeading
+    return -math.remainder(self.gyro.getAngle(), 360)
   
   def getRotation2d(self):
     return Rotation2d.fromDegrees(self.getHeading())
