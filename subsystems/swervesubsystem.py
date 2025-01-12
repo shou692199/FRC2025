@@ -86,11 +86,5 @@ class SwerveSubsystem(commands2.Subsystem):
     for m in self.modules:
       m.stop()
 
-  def shouldFlipPath(self):
-    alliance = DriverStation.getAlliance()
-    if alliance is None:
-      return False
-    return alliance == DriverStation.Alliance.kRed
-
   def periodic(self):
     self.odometer.update(self.getRotation2d(), self.getModulePositions())

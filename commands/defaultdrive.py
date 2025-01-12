@@ -1,6 +1,6 @@
 import commands2
 from typing import Callable
-from constants import DriveConstants
+from constants import DriveConstants, OIConstants
 from wpimath.filter import SlewRateLimiter
 from wpimath.kinematics import ChassisSpeeds
 from subsystems.swervesubsystem import SwerveSubsystem
@@ -45,4 +45,4 @@ class DefaultDrive(commands2.Command):
     return False
 
   def applyDeadband(self, value: float) -> float:
-    return value if abs(value) > DriveConstants.kDeadband else 0
+    return value if abs(value) > OIConstants.kDeadband else 0

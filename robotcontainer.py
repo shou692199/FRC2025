@@ -1,4 +1,4 @@
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, DriverStation
 from commands.defaultdrive import DefaultDrive
 from commands2 import Command, InstantCommand
 from commands2.button import CommandXboxController
@@ -6,12 +6,12 @@ from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
 from subsystems.swervesubsystem import SwerveSubsystem
-from constants import DriveConstants
+from constants import AutoConstants, OIConstants
 
 class RobotContainer:
   def __init__(self):
     self.swerve = SwerveSubsystem()
-    self.driverJoystick = CommandXboxController(0)
+    self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
 
     self.configureButtonBindings()
 
@@ -20,10 +20,13 @@ class RobotContainer:
         self.swerve.getPose,
         self.swerve.resetOdometry,
         self.swerve.getChassisSpeeds,
-        lambda speed, feed: self.swerve.driveRobotRelative(speed),
-        PPHolonomicDriveController(PIDConstants(5), PIDConstants(5)),
-        DriveConstants.kRobotConfig,
-        self.swerve.shouldFlipPath,
+        lambda speed, _: self.swerve.driveRobotRelative(speed),
+        PPHolonomicDriveController(
+          PIDConstants(AutoConstants.kPTranslation),
+          PIDConstants(AutoConstants.kPRotation)
+        ),
+        AutoConstants.kRobotConfig,
+        self.shouldFlipPath,
         self.swerve
       )
 
@@ -41,6 +44,12 @@ class RobotContainer:
 
   def configureButtonBindings(self):
     self.driverJoystick.x().onTrue(InstantCommand(self.swerve.zeroHeading))
+
+  def shouldFlipPath(self):
+    alliance = DriverStation.getAlliance()
+    if alliance is None:
+      return False
+    return alliance == DriverStation.Alliance.kRed
 
   def getAutonomousCommand(self) -> Command:
     return self.autoChooser.getSelected()

@@ -37,8 +37,6 @@ class DriveConstants:
   kTeleDriveMaxAccelerationUnitsPerSecond = 3.0
   kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3.0
 
-  kDeadband = 0.06
-
   kFrontLeftDriveMotorId = 0
   kFrontLeftSteerMotorId = 1
   kFrontLeftShaftEncoderId = 10
@@ -59,20 +57,14 @@ class DriveConstants:
   kBackRightShaftEncoderId = 12
   kBackRightShaftEncoderOffset = 0.1413
 
-  kRobotConfig = RobotConfig.fromGUISettings()
-
 class AutoConstants:
-  kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 4
-  kMaxAngularSpeedRadiansPerSecond = DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond / 10
-  kMaxAccelerationMetersPerSecondSquared = 3.0
-  kMaxAngularAccelerationRadiansPerSecondSquared = math.pi / 4
-  kPXController = 0.5
-  kPYController = 0.5
-  kPThetaController = 3.2
-  kThetaControllerConstraints = TrapezoidProfileRadians.Constraints(
-    kMaxAngularSpeedRadiansPerSecond,
-    kMaxAngularAccelerationRadiansPerSecondSquared
-  )
+  kRobotConfig = RobotConfig.fromGUISettings()
+  kPTranslation = 5
+  kPRotation = 5
+
+class OIConstants:
+  kDriverControllerPort = 0
+  kDeadband = 0.06
 
 class VisionConstants:
   kMainCameraName = "Microsoft_LifeCam_HD-3000"
