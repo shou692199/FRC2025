@@ -1,7 +1,7 @@
-import math
 import commands2
 from typing import Iterable
-from wpilib import DriverStation
+from wpilib import SmartDashboard
+from wpimath.units import radiansToDegrees
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
@@ -54,7 +54,7 @@ class SwerveSubsystem(commands2.Subsystem):
     self.odometer.resetPosition(self.getRotation2d(), self.getModulePositions(), pose)
 
   def getHeading(self):
-    return -math.remainder(self.gyro.getAngle(), 360)
+    return -self.gyro.getYaw()#-math.remainder(self.gyro.getAngle(), 360)
   
   def getRotation2d(self):
     return Rotation2d.fromDegrees(self.getHeading())
@@ -88,3 +88,4 @@ class SwerveSubsystem(commands2.Subsystem):
 
   def periodic(self):
     self.odometer.update(self.getRotation2d(), self.getModulePositions())
+    SmartDashboard.putNumber("steer", radiansToDegrees(self.frontLeft.getSteerPosition()))

@@ -2,7 +2,7 @@ import math
 import typing
 from wpilib.simulation import DCMotorSim, SimDeviceSim
 from wpilib import RobotController, DriverStation
-from wpimath.units import radiansToRotations, metersToInches
+from wpimath.units import radiansToRotations, metersToFeet
 from wpimath.system.plant import DCMotor, LinearSystemId
 from pyfrc.physics.core import PhysicsInterface
 from pyfrc.physics import drivetrains
@@ -13,7 +13,8 @@ from constants import ModuleConstants, DriveConstants
 if typing.TYPE_CHECKING:
   from robot import MyRobot
 
-kWheelBase = metersToInches(DriveConstants.kWheelBase)
+kWheelBaseFeet = metersToFeet(DriveConstants.kWheelBaseMeters)
+kPhysicalMaxSpeedFeetPerSecond = metersToFeet(DriveConstants.kPhysicalMaxSpeedMetersPerSecond)
 
 class PhysicsEngine:
   def __init__(
@@ -32,14 +33,14 @@ class PhysicsEngine:
     self.brs_talon_sim = self.swerve.backRight.steerMotor.sim_state
 
     gearbox = DCMotor.falcon500(1)
-    self.fld_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.fls_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.frd_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.frs_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.bld_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.bls_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.brd_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
-    self.brs_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.001, 1), gearbox)
+    self.fld_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.fls_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.frd_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.frs_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.bld_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.bls_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.brd_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
+    self.brs_motor_sim = DCMotorSim(LinearSystemId.DCMotorSystem(gearbox, 0.0001, 1), gearbox)
 
     #self.fld_talon_sim.orientation = ChassisReference.Clockwise_Positive
     #self.frd_talon_sim.orientation = ChassisReference.Clockwise_Positive
@@ -146,8 +147,9 @@ class PhysicsEngine:
       (-self.swerve.backRight.getModuleAngle().degrees() + 360) % 360,
       (-self.swerve.frontLeft.getModuleAngle().degrees() + 360) % 360,
       (-self.swerve.frontRight.getModuleAngle().degrees() + 360) % 360,
-      kWheelBase,
-      kWheelBase
+      kWheelBaseFeet,
+      kWheelBaseFeet,
+      kPhysicalMaxSpeedFeetPerSecond
     )
     pose = self.physics_controller.drive(speeds, tm_diff)
 

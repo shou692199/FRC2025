@@ -2,13 +2,12 @@ import math
 from wpimath.units import inchesToMeters
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.trajectory import TrapezoidProfileRadians
 from pathplannerlib.config import RobotConfig
 from phoenix6 import CANBus
 
 class ModuleConstants:
   kCANbus = CANBus("rio")
-  kWheelDiameterMeters = inchesToMeters(4)
+  kWheelDiameterMeters = 0.097
   kDriveMotorGearRatio = 1 / 6.75
   kSteerMotorGearRatio = 1 / 12.8
   kDriveEncoderRot2Meter = kDriveMotorGearRatio * math.pi * kWheelDiameterMeters
@@ -21,13 +20,13 @@ class ModuleConstants:
   kPSteerMotor = 0.5
 
 class DriveConstants:
-  kTrackWidth = inchesToMeters(21)
-  kWheelBase  = inchesToMeters(21)
+  kTrackWidthMeters = 0.7
+  kWheelBaseMeters  = 0.53507
   kDriveKinematics = SwerveDrive4Kinematics(
-    Translation2d( kWheelBase / 2,  kTrackWidth / 2),
-    Translation2d( kWheelBase / 2, -kTrackWidth / 2),
-    Translation2d(-kWheelBase / 2,  kTrackWidth / 2),
-    Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
+    Translation2d( kWheelBaseMeters / 2,  kWheelBaseMeters / 2),
+    Translation2d( kWheelBaseMeters / 2, -kWheelBaseMeters / 2),
+    Translation2d(-kWheelBaseMeters / 2,  kWheelBaseMeters / 2),
+    Translation2d(-kWheelBaseMeters / 2, -kWheelBaseMeters / 2)
   )
 
   kPhysicalMaxSpeedMetersPerSecond = 5
@@ -59,8 +58,8 @@ class DriveConstants:
 
 class AutoConstants:
   kRobotConfig = RobotConfig.fromGUISettings()
-  kPTranslation = 5
-  kPRotation = 5
+  kPTranslation = 0.5
+  kPRotation = 3.2
 
 class OIConstants:
   kDriverControllerPort = 0
