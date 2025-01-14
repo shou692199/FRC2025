@@ -1,7 +1,9 @@
+import math
 import commands2
 from typing import Iterable
 from wpilib import SmartDashboard
-from wpimath.units import radiansToDegrees
+from wpimath.controller import PIDController
+from wpimath.units import radiansToDegrees, degreesToRadians
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
@@ -44,17 +46,22 @@ class SwerveSubsystem(commands2.Subsystem):
     self.odometer = SwerveDrive4Odometry(
       DriveConstants.kDriveKinematics, Rotation2d(0), self.getModulePositions()
     )
+
+    self.desiredHeading = float(0)
+    self.headingPIDController = PIDController(1.2, 0, 0)
+    self.headingPIDController.enableContinuousInput(-math.pi, math.pi)
     
     self.zeroHeading()
 
   def zeroHeading(self):
-    self.gyro.zeroYaw()
+    self.gyro.reset()
+    self.desiredHeading = self.getRotation2d().radians()
   
   def resetOdometry(self, pose: Pose2d):
     self.odometer.resetPosition(self.getRotation2d(), self.getModulePositions(), pose)
 
   def getHeading(self):
-    return -self.gyro.getYaw()#-math.remainder(self.gyro.getAngle(), 360)
+    return -math.remainder(self.gyro.getAngle(), 360)
   
   def getRotation2d(self):
     return Rotation2d.fromDegrees(self.getHeading())
@@ -79,6 +86,14 @@ class SwerveSubsystem(commands2.Subsystem):
     return DriveConstants.kDriveKinematics.toChassisSpeeds(self.getModuleStates())
 
   def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds):
+    differ = lambda a, b: abs((a - b + math.pi) % math.tau - math.pi)
+    currentHeading = self.getRotation2d().radians()
+    if abs(chassisSpeeds.omega) > 0.001 or differ(self.desiredHeading, currentHeading) > math.pi / 4:
+      self.desiredHeading = currentHeading
+    elif (chassisSpeeds.vx**2 + chassisSpeeds.vy**2)**0.5 > 0.001:
+      chassisSpeeds.omega = self.headingPIDController.calculate(currentHeading, self.desiredHeading)
+    print(chassisSpeeds.omega)
+
     moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds)
     self.setModuleStates(moduleStates)
 
