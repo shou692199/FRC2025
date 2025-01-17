@@ -3,7 +3,7 @@ import commands2
 from typing import Iterable
 from wpilib import SmartDashboard
 from wpimath.controller import PIDController
-from wpimath.units import radiansToDegrees, degreesToRadians
+from wpimath.units import radiansToDegrees
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
