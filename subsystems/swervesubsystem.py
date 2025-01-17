@@ -92,7 +92,6 @@ class SwerveSubsystem(commands2.Subsystem):
       self.desiredHeading = currentHeading
     elif (chassisSpeeds.vx**2 + chassisSpeeds.vy**2)**0.5 > 0.001:
       chassisSpeeds.omega = self.headingPIDController.calculate(currentHeading, self.desiredHeading)
-    print(chassisSpeeds.omega)
 
     moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds)
     self.setModuleStates(moduleStates)
