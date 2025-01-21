@@ -5,12 +5,12 @@ from commands2.button import CommandXboxController
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
-from subsystems.swervesubsystem import SwerveSubsystem
+from subsystems.swerve import Swerve
 from constants import AutoConstants, OIConstants
 
 class RobotContainer:
   def __init__(self):
-    self.swerve = SwerveSubsystem()
+    self.swerve = Swerve()
     self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
 
     self.configureButtonBindings()
@@ -43,7 +43,7 @@ class RobotContainer:
     )
 
   def configureButtonBindings(self):
-    self.driverJoystick.x().onTrue(InstantCommand(self.swerve.zeroHeading))
+    self.driverJoystick.y().onTrue(InstantCommand(self.swerve.zeroHeading))
 
   def shouldFlipPath(self):
     alliance = DriverStation.getAlliance()

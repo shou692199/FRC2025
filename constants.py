@@ -56,6 +56,10 @@ class DriveConstants:
   kBackRightShaftEncoderId = 12
   kBackRightShaftEncoderOffset = 0.1413
 
+class ElevatorConstants:
+  kLeftMotorId = 14
+  kRightMotorId = 15
+
 class AutoConstants:
   kRobotConfig = RobotConfig.fromGUISettings()
   kPTranslation = 0.5

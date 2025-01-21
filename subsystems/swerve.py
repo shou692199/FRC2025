@@ -11,7 +11,7 @@ from navx import AHRS
 from swervemodule import SwerveModule
 from constants import DriveConstants
 
-class SwerveSubsystem(commands2.Subsystem):
+class Swerve(commands2.Subsystem):
   def __init__(self):
     self.frontLeft = SwerveModule(
       DriveConstants.kFrontLeftDriveMotorId,

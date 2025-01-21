@@ -3,12 +3,12 @@ from typing import Callable
 from constants import DriveConstants, OIConstants
 from wpimath.filter import SlewRateLimiter
 from wpimath.kinematics import ChassisSpeeds
-from subsystems.swervesubsystem import SwerveSubsystem
+from subsystems.swerve import Swerve
 
 class DefaultDrive(commands2.Command):
   def __init__(
       self,
-      swerve: SwerveSubsystem,
+      swerve: Swerve,
       xSpeed: Callable[[], float],
       ySpeed: Callable[[], float],
       oSpeed: Callable[[], float],
