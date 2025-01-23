@@ -1,5 +1,5 @@
 import math
-from constants import ModuleConstants
+from constants import ModuleConstants, DriveConstants
 from phoenix6.configs import CANcoderConfiguration, TalonFXConfiguration
 from phoenix6.configs.config_groups import SensorDirectionValue
 from phoenix6.configs.config_groups import InvertedValue, NeutralModeValue
@@ -79,7 +79,7 @@ class SwerveModule:
     return SwerveModuleState(self.getDriveVelocity(), Rotation2d(self.getSteerPosition()))
 
   def setDesiredState(self, state: SwerveModuleState):
-    if state.speed < 0.001:
+    if state.speed <= DriveConstants.kDeadband:
       self.stop()
       return
     

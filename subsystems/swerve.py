@@ -48,13 +48,13 @@ class Swerve(commands2.Subsystem):
     )
 
     self.desiredHeading = float(0)
-    self.headingPIDController = PIDController(1.2, 0, 0)
+    self.headingPIDController = PIDController(DriveConstants.kPHeading, 0, 0)
     self.headingPIDController.enableContinuousInput(-math.pi, math.pi)
     
     self.zeroHeading()
 
-    self.field2d = Field2d()
-    SmartDashboard.putData("Field", self.field2d)
+    self.field = Field2d()
+    SmartDashboard.putData("Field", self.field)
 
   def zeroHeading(self):
     self.gyro.reset()
@@ -91,9 +91,11 @@ class Swerve(commands2.Subsystem):
   def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds):
     differ = lambda a, b: abs((a - b + math.pi) % math.tau - math.pi)
     currentHeading = self.getRotation2d().radians()
-    if abs(chassisSpeeds.omega) > 0.001 or differ(self.desiredHeading, currentHeading) > math.pi / 4:
+    if (abs(chassisSpeeds.omega) > DriveConstants.kDeadband
+        or differ(self.desiredHeading, currentHeading) > math.pi / 4
+    ):
       self.desiredHeading = currentHeading
-    elif (chassisSpeeds.vx**2 + chassisSpeeds.vy**2)**0.5 > 0.001:
+    elif (chassisSpeeds.vx**2 + chassisSpeeds.vy**2)**0.5 > DriveConstants.kDeadband:
       chassisSpeeds.omega = self.headingPIDController.calculate(currentHeading, self.desiredHeading)
 
     moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds)
@@ -105,5 +107,5 @@ class Swerve(commands2.Subsystem):
 
   def periodic(self):
     self.odometer.update(self.getRotation2d(), self.getModulePositions())
-    self.field2d.setRobotPose(self.getPose())
+    self.field.setRobotPose(self.getPose())
     SmartDashboard.putNumber("steer", radiansToDegrees(self.frontLeft.getSteerPosition()))

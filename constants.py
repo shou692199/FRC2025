@@ -30,6 +30,9 @@ class DriveConstants:
     Translation2d(-kWheelBaseMeters / 2, -kWheelBaseMeters / 2)
   )
 
+  kDeadband = 0.001
+  kPHeading = 1.2
+
   kPhysicalMaxSpeedMetersPerSecond = 5
   kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * math.tau
   kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 4
@@ -90,3 +93,11 @@ class OIConstants:
 
 class VisionConstants:
   kMainCameraName = "Microsoft_LifeCam_HD-3000"
+
+class PhysicsConstants:
+  kDriveMotorMOI = 0.0001
+  kSteerMotorMOI = 0.0001
+  kGyroSimDevice = "navX-Sensor[4]"
+  kElevatorMassKilograms = 4
+  kElevatorSimGravity = False
+  kLiftMotorStdDevs = 0.01
