@@ -56,14 +56,13 @@ class Elevator(commands2.Subsystem):
 
   def getHeight(self):
     return self.liftEncoder.getPosition()
-  
-  def setHeight(self, height: float):
-    self.liftClosedLoopController.setReference(
-      height, SparkMax.ControlType.kMAXMotionPositionControl
-    )
 
-  def setHeight(self, reefLayer: ReefLayers):
-    self.setHeight(reefLayer.value)
+  def setHeight(self, height: float | ReefLayers):
+    if type(height) is ReefLayers:
+      height = height.value
+    self.liftClosedLoopController.setReference(
+      height, SparkMax.ControlType.kPosition
+    )
 
   def setSpeed(self, speed: float):
     self.liftMotor.set(speed)

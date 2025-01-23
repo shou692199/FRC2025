@@ -1,7 +1,7 @@
 import math
 import commands2
 from typing import Iterable
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, Field2d
 from wpimath.controller import PIDController
 from wpimath.units import radiansToDegrees
 from wpimath.geometry import Rotation2d, Pose2d
@@ -53,6 +53,9 @@ class Swerve(commands2.Subsystem):
     
     self.zeroHeading()
 
+    self.field2d = Field2d()
+    SmartDashboard.putData("Field", self.field2d)
+
   def zeroHeading(self):
     self.gyro.reset()
     self.desiredHeading = self.getRotation2d().radians()
@@ -61,7 +64,7 @@ class Swerve(commands2.Subsystem):
     self.odometer.resetPosition(self.getRotation2d(), self.getModulePositions(), pose)
 
   def getHeading(self):
-    return -math.remainder(self.gyro.getAngle(), 360)
+    return -self.gyro.getYaw()
   
   def getRotation2d(self):
     return Rotation2d.fromDegrees(self.getHeading())
@@ -102,4 +105,5 @@ class Swerve(commands2.Subsystem):
 
   def periodic(self):
     self.odometer.update(self.getRotation2d(), self.getModulePositions())
+    self.field2d.setRobotPose(self.getPose())
     SmartDashboard.putNumber("steer", radiansToDegrees(self.frontLeft.getSteerPosition()))
