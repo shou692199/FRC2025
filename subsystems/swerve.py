@@ -80,7 +80,7 @@ class Swerve(commands2.Subsystem):
       desiredState, DriveConstants.kPhysicalMaxSpeedMetersPerSecond
     )
     for i in range(4):
-      self.modules[i].setDesiredState(desiredState[i], str(i))
+      self.modules[i].setDesiredState(desiredState[i])
 
   def getChassisSpeeds(self):
     return DriveConstants.kDriveKinematics.toChassisSpeeds(self.getModuleStates())

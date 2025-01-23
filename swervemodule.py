@@ -23,13 +23,6 @@ class SwerveModule:
     self.shaftEncoderOffset = shaftEncoderOffset
 
     self.configureBaseParam()
-
-    self.drivePositionStatus = self.driveMotor.get_position()
-    self.driveVelocityStatus = self.driveMotor.get_velocity()
-    self.steerPositionStatus = self.steerMotor.get_position()
-    self.steerVelocityStatus = self.steerMotor.get_velocity()
-    self.shaftPositionStatus = self.shaftEncoder.get_absolute_position()
-
     self.resetEncoders()
     
     self.driveVelocityVoltage = VelocityVoltage(0).with_slot(0)
@@ -58,19 +51,19 @@ class SwerveModule:
     self.shaftEncoder.configurator.apply(cfg_shaft)
     
   def getDrivePosition(self):
-    return self.drivePositionStatus.refresh(False).value_as_double
+    return self.driveMotor.get_position().value_as_double
 
   def getSteerPosition(self):
-    return self.steerPositionStatus.refresh(False).value_as_double
+    return self.steerMotor.get_position().value_as_double
   
   def getDriveVelocity(self):
-    return self.driveVelocityStatus.refresh(False).value_as_double
+    return self.driveMotor.get_velocity().value_as_double
 
   def getSteerVelocity(self):
-    return self.steerVelocityStatus.refresh(False).value_as_double
+    return self.steerMotor.get_velocity().value_as_double
   
   def getShaftEncoderRad(self):
-    return math.tau * self.shaftPositionStatus.refresh(False).value
+    return math.tau * self.shaftEncoder.get_position().value
   
   def resetEncoders(self):
     self.driveMotor.set_position(0)
@@ -85,7 +78,7 @@ class SwerveModule:
   def getModuleState(self):
     return SwerveModuleState(self.getDriveVelocity(), Rotation2d(self.getSteerPosition()))
 
-  def setDesiredState(self, state: SwerveModuleState, identifier: str = ""):
+  def setDesiredState(self, state: SwerveModuleState):
     if state.speed < 0.001:
       self.stop()
       return
