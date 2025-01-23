@@ -1,16 +1,19 @@
 from wpilib import SmartDashboard, DriverStation
 from commands.defaultdrive import DefaultDrive
+from commands.elevatorctrl import ElevatorCtrl
 from commands2 import Command, InstantCommand
 from commands2.button import CommandXboxController
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
 from subsystems.swerve import Swerve
-from constants import AutoConstants, OIConstants
+from subsystems.elevator import Elevator
+from constants import AutoConstants, OIConstants, ReefLayers
 
 class RobotContainer:
   def __init__(self):
     self.swerve = Swerve()
+    self.elevator = Elevator()
     self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
 
     self.configureButtonBindings()
@@ -44,6 +47,20 @@ class RobotContainer:
 
   def configureButtonBindings(self):
     self.driverJoystick.y().onTrue(InstantCommand(self.swerve.zeroHeading))
+    self.driverJoystick.b().whileTrue(ElevatorCtrl(self.elevator, True))
+    self.driverJoystick.x().whileTrue(ElevatorCtrl(self.elevator, False))
+    self.driverJoystick.povUp().onTrue(
+      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L1))
+    )
+    self.driverJoystick.povRight().onTrue(
+      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L2))
+    )
+    self.driverJoystick.povDown().onTrue(
+      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L3))
+    )
+    self.driverJoystick.povLeft().onTrue(
+      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L4))
+    )
 
   def shouldFlipPath(self):
     alliance = DriverStation.getAlliance()

@@ -1,4 +1,5 @@
 import math
+from enum import Enum
 from wpimath.units import inchesToMeters
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
@@ -57,8 +58,26 @@ class DriveConstants:
   kBackRightShaftEncoderOffset = 0.1413
 
 class ElevatorConstants:
-  kLeftMotorId = 14
-  kRightMotorId = 15
+  kChainPitchMeters = inchesToMeters(0.25)
+  kChainWheelTeeth = 26
+  kLiftMotorGearRatio = 1 / 20
+  kLiftEncoderRot2Meter = kLiftMotorGearRatio * kChainWheelTeeth * kChainPitchMeters * 2
+
+  kSmartCurrentLimit = 50
+  kForwardLimitMeters = 1.3
+  kReverseLimitMeters = 0
+  kTeleMaxDutyCycle = 0.3
+  kAutoMaxDutyCycle = 0.65
+  kPLiftMotor = 20
+
+  kLiftMotorId = 14
+  kLiftMotorSubId = 15
+
+class ReefLayers(Enum):
+  L1 = 0.20
+  L2 = 0.55
+  L3 = 0.90
+  L4 = 1.25
 
 class AutoConstants:
   kRobotConfig = RobotConfig.fromGUISettings()
