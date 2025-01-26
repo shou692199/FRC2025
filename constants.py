@@ -7,7 +7,7 @@ from pathplannerlib.config import RobotConfig
 from phoenix6 import CANBus
 
 class ModuleConstants:
-  kCANbus = CANBus("rio")
+  kCANbus = CANBus("canivore")
   kWheelDiameterMeters = 0.097
   kDriveMotorGearRatio = 1 / 6.75
   kSteerMotorGearRatio = 1 / 12.8
