@@ -108,4 +108,3 @@ class Swerve(commands2.Subsystem):
   def periodic(self):
     self.odometer.update(self.getRotation2d(), self.getModulePositions())
     self.field.setRobotPose(self.getPose())
-    SmartDashboard.putNumber("steer", radiansToDegrees(self.frontLeft.getSteerPosition()))

@@ -10,9 +10,7 @@ class ModuleConstants:
   kCANbus = CANBus("canivore")
   kWheelDiameterMeters = 0.097
   kDriveMotorGearRatio = 1 / 6.75
-  kSteerMotorGearRatio = 1 / 12.8
   kDriveEncoderRot2Meter = kDriveMotorGearRatio * math.pi * kWheelDiameterMeters
-  kSteerEncoderRot2Rad = kSteerMotorGearRatio * math.tau
   kDriveMotorMaxRPM = 6380
   kDriveMotorMaxVoltage = 12
   kPDriveMotor = 0.8

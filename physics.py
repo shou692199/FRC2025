@@ -21,7 +21,6 @@ class SwerveModulePhysics:
     self.driveMotorSim = module.driveMotor.sim_state
     self.steerMotorSim = module.steerMotor.sim_state
     self.shaftEncoderSim = module.shaftEncoder.sim_state
-    self.shaftInitialPos = module.getShaftEncoderRad()
 
     gearbox = DCMotor.falcon500(1)
     self.driveMotorSysId = DCMotorSim(
@@ -43,11 +42,10 @@ class SwerveModulePhysics:
 
   def updateKinematic(self):
     self.driveMotorSim.set_raw_rotor_position(radiansToRotations(self.driveMotorSysId.getAngularPosition()))
-    self.steerMotorSim.set_raw_rotor_position(radiansToRotations(self.steerMotorSysId.getAngularPosition()))
-    self.shaftEncoderSim.set_raw_position((self.module.getSteerPosition() - self.shaftInitialPos) / math.tau)
+    self.shaftEncoderSim.set_raw_position(radiansToRotations(self.steerMotorSysId.getAngularPosition()))
 
     self.driveMotorSim.set_rotor_velocity(radiansToRotations(self.driveMotorSysId.getAngularVelocity()))
-    self.steerMotorSim.set_rotor_velocity(radiansToRotations(self.steerMotorSysId.getAngularVelocity()))
+    self.shaftEncoderSim.set_velocity(radiansToRotations(self.steerMotorSysId.getAngularVelocity()))
 
   def getDriveDutyCycle(self):
     return self.module.driveMotor.get_duty_cycle().value_as_double

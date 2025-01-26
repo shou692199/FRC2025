@@ -3,9 +3,9 @@ from constants import ModuleConstants, DriveConstants
 from phoenix6.configs import CANcoderConfiguration, TalonFXConfiguration
 from phoenix6.configs.config_groups import SensorDirectionValue
 from phoenix6.configs.config_groups import InvertedValue, NeutralModeValue
-from phoenix6.controls import DutyCycleOut, NeutralOut, VelocityVoltage
+from phoenix6.controls import NeutralOut, VelocityVoltage, PositionDutyCycle
 from phoenix6.hardware import CANcoder, TalonFX
-from wpimath.controller import PIDController
+from phoenix6.signals import FeedbackSensorSourceValue
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModulePosition, SwerveModuleState
 
@@ -26,8 +26,7 @@ class SwerveModule:
     self.resetEncoders()
     
     self.driveVelocityVoltage = VelocityVoltage(0).with_slot(0)
-    self.steerPIDController = PIDController(ModuleConstants.kPSteerMotor, 0, 0)
-    self.steerPIDController.enableContinuousInput(-math.pi, math.pi)
+    self.steerPositionDutyCycle = PositionDutyCycle(0).with_slot(0)
   
   def configureBaseParam(self):
     cfg_drive = TalonFXConfiguration()
@@ -40,8 +39,11 @@ class SwerveModule:
 
     cfg_steer = TalonFXConfiguration()
     cfg_steer.motor_output.inverted = InvertedValue.COUNTER_CLOCKWISE_POSITIVE
-    cfg_steer.feedback.sensor_to_mechanism_ratio = 1 / ModuleConstants.kSteerEncoderRot2Rad
     cfg_steer.motor_output.neutral_mode = NeutralModeValue.BRAKE
+    cfg_steer.feedback.feedback_remote_sensor_id = self.shaftEncoder.device_id
+    cfg_steer.feedback.feedback_sensor_source = FeedbackSensorSourceValue.REMOTE_CANCODER
+    cfg_steer.closed_loop_general.continuous_wrap = True
+    cfg_steer.slot0.k_p = ModuleConstants.kPSteerMotor
     self.steerMotor.configurator.apply(cfg_steer)
 
     cfg_shaft = CANcoderConfiguration()
@@ -54,20 +56,16 @@ class SwerveModule:
     return self.driveMotor.get_position().value_as_double
 
   def getSteerPosition(self):
-    return self.steerMotor.get_position().value_as_double
+    return self.steerMotor.get_position().value * math.tau
   
   def getDriveVelocity(self):
     return self.driveMotor.get_velocity().value_as_double
 
   def getSteerVelocity(self):
-    return self.steerMotor.get_velocity().value_as_double
-  
-  def getShaftEncoderRad(self):
-    return math.tau * self.shaftEncoder.get_position().value
+    return self.steerMotor.get_velocity().value * math.tau
   
   def resetEncoders(self):
     self.driveMotor.set_position(0)
-    self.steerMotor.set_position(self.getShaftEncoderRad())
   
   def getModuleAngle(self):
     return self.getModuleState().angle
@@ -86,7 +84,7 @@ class SwerveModule:
     state.optimize(self.getModuleAngle())
     self.driveMotor.set_control(self.driveVelocityVoltage.with_velocity(state.speed))
     self.steerMotor.set_control(
-      DutyCycleOut(self.steerPIDController.calculate(self.getSteerPosition(), state.angle.radians()))
+      self.steerPositionDutyCycle.with_position(state.angle.radians() / math.tau)
     )
 
   def stop(self):
