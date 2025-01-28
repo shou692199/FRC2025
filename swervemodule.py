@@ -1,5 +1,6 @@
 import math
 from constants import ModuleConstants, DriveConstants
+from phoenix6 import BaseStatusSignal
 from phoenix6.configs import CANcoderConfiguration, TalonFXConfiguration
 from phoenix6.configs.config_groups import SensorDirectionValue
 from phoenix6.configs.config_groups import InvertedValue, NeutralModeValue
@@ -25,6 +26,19 @@ class SwerveModule:
     self.configureBaseParam()
     self.resetEncoders()
     
+    self.drivePositionSignal = self.driveMotor.get_position()
+    self.steerPositionSignal = self.steerMotor.get_position()
+    self.driveVelocitySignal = self.driveMotor.get_velocity()
+    self.steerVelocitySignal = self.steerMotor.get_velocity()
+
+    BaseStatusSignal.set_update_frequency_for_all(
+      250,
+      self.drivePositionSignal,
+      self.steerPositionSignal,
+      self.driveVelocitySignal,
+      self.steerVelocitySignal
+    )
+
     self.driveVelocityVoltage = VelocityVoltage(0).with_slot(0)
     self.steerPositionDutyCycle = PositionDutyCycle(0).with_slot(0)
   
@@ -53,16 +67,16 @@ class SwerveModule:
     self.shaftEncoder.configurator.apply(cfg_shaft)
     
   def getDrivePosition(self):
-    return self.driveMotor.get_position().value_as_double
+    return self.drivePositionSignal.refresh().value_as_double
 
   def getSteerPosition(self):
-    return self.steerMotor.get_position().value * math.tau
+    return self.steerPositionSignal.refresh().value * math.tau
   
   def getDriveVelocity(self):
-    return self.driveMotor.get_velocity().value_as_double
+    return self.driveVelocitySignal.refresh().value_as_double
 
   def getSteerVelocity(self):
-    return self.steerMotor.get_velocity().value * math.tau
+    return self.steerVelocitySignal.refresh().value * math.tau
   
   def resetEncoders(self):
     self.driveMotor.set_position(0)
