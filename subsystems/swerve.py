@@ -3,10 +3,10 @@ import commands2
 from typing import Iterable
 from wpilib import SmartDashboard, Field2d
 from wpimath.controller import PIDController
-from wpimath.units import radiansToDegrees
 from wpimath.geometry import Rotation2d, Pose2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
+from ntcore import NetworkTableInstance
 from navx import AHRS
 from swervemodule import SwerveModule
 from constants import DriveConstants
@@ -55,6 +55,10 @@ class Swerve(commands2.Subsystem):
 
     self.field = Field2d()
     SmartDashboard.putData("Field", self.field)
+
+    nt = NetworkTableInstance.getDefault()
+    self.moduleStatePublisher = nt.getStructArrayTopic("/SwerveStates", SwerveModuleState).publish()
+    self.pose2dPublisher = nt.getStructTopic("/SwervePose2d", Pose2d).publish()
 
   def zeroHeading(self):
     self.gyro.reset()
@@ -108,3 +112,5 @@ class Swerve(commands2.Subsystem):
   def periodic(self):
     self.odometer.update(self.getRotation2d(), self.getModulePositions())
     self.field.setRobotPose(self.getPose())
+    self.moduleStatePublisher.set(list(self.getModuleStates()))
+    self.pose2dPublisher.set(self.getPose())
