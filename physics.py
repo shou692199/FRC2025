@@ -54,8 +54,7 @@ class SwerveModulePhysics:
     return [self.driveMotorSysId.getCurrentDraw(), self.steerMotorSysId.getCurrentDraw()]
 
 class SwervePhysics:
-  def __init__(self, physicsController: PhysicsInterface, swerve: Swerve):
-    self.physicsController = physicsController
+  def __init__(self, swerve: Swerve):
     self.swerve = swerve
     self.modulesSim = [SwerveModulePhysics(m) for m in swerve.modules]
     self.gyroAngleSim = SimDeviceSim(PhysicsConstants.kGyroSimDevice).getDouble("Yaw")
@@ -65,9 +64,8 @@ class SwervePhysics:
       m.update(tm_diff)
 
     chassisSpeeds = self.swerve.getChassisSpeeds()
-    pose = self.physicsController.drive(chassisSpeeds, tm_diff)
     if abs(chassisSpeeds.omega) > DriveConstants.kDeadband:
-      self.gyroAngleSim.set(-pose.rotation().degrees())
+      self.gyroAngleSim.set(-(self.swerve.getHeading() + chassisSpeeds.omega_dps * tm_diff))
 
   def getCurrentDraw(self):
     currentDraw = []
@@ -76,8 +74,7 @@ class SwervePhysics:
     return currentDraw
 
 class ElevatorPhysics:
-  def __init__(self, physicsController: PhysicsInterface, elevator: Elevator):
-    self.physicsController = physicsController
+  def __init__(self, elevator: Elevator):
     self.elevator = elevator
 
     gearbox = DCMotor.NEO(2)
@@ -117,8 +114,8 @@ class PhysicsEngine:
   def __init__(
     self, physics_controller: PhysicsInterface, robot: "MyRobot"
   ):
-    self.swerveSim = SwervePhysics(physics_controller, robot.swerve)
-    self.elevatorSim = ElevatorPhysics(physics_controller, robot.elevator)
+    self.swerveSim = SwervePhysics(robot.swerve)
+    self.elevatorSim = ElevatorPhysics(robot.elevator)
   
   def update_sim(self, now: float, tm_diff: float):
     if DriverStation.isEnabled():
