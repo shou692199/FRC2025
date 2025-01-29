@@ -1,6 +1,7 @@
 import commands2
 from typing import Callable
 from constants import DriveConstants, OIConstants
+from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpimath.kinematics import ChassisSpeeds
 from subsystems.swerve import Swerve
@@ -26,7 +27,7 @@ class DefaultDrive(commands2.Command):
 
   def execute(self):
     rawValues = [self.xSpeed(), self.ySpeed(), self.oSpeed()]
-    xSpeed, ySpeed, oSpeed = map(self.applyDeadband, rawValues)
+    xSpeed, ySpeed, oSpeed = map(lambda v: applyDeadband(v, OIConstants.kDeadband), rawValues)
 
     xSpeed = self.xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond
     ySpeed = self.yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond
@@ -43,6 +44,3 @@ class DefaultDrive(commands2.Command):
 
   def isFinished(self):
     return False
-
-  def applyDeadband(self, value: float) -> float:
-    return value if abs(value) > OIConstants.kDeadband else 0
