@@ -4,6 +4,7 @@ from wpimath.units import inchesToMeters, degreesToRadians
 from wpimath.geometry import Translation2d, Transform3d, Rotation3d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from pathplannerlib.config import RobotConfig
+from photonlibpy.photonCamera import PhotonCamera
 from phoenix6 import CANBus
 
 class ModuleConstants:
@@ -16,7 +17,7 @@ class ModuleConstants:
   kPDriveMotor = 0.8
   kSDriveMotor = 0.04
   kVDriveMotor = kDriveMotorMaxVoltage * 60 / kDriveEncoderRot2Meter / kDriveMotorMaxRPM
-  kPSteerMotor = 0.5
+  kPSteerMotor = 0.7
 
 class DriveConstants:
   kTrackWidthMeters = 0.7
@@ -90,7 +91,7 @@ class OIConstants:
   kDeadband = 0.06
 
 class VisionConstants:
-  kMainCameraName = "Microsoft_LifeCam_HD-3000"
+  kMainCameraPhoton = PhotonCamera("Microsoft_LifeCam_HD-3000")
   kMainCameraTransform = Transform3d(
     0.35, 0.105, 0.115, Rotation3d(0, degreesToRadians(15), 0)
   )

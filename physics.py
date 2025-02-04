@@ -1,7 +1,7 @@
 import math
 import typing
 from wpilib.simulation import DCMotorSim, SimDeviceSim, ElevatorSim, RoboRioSim, BatterySim
-from wpilib import RobotController, DriverStation, SmartDashboard, Mechanism2d
+from wpilib import DriverStation, SmartDashboard, Mechanism2d
 from wpimath.units import radiansToRotations
 from wpimath.system.plant import DCMotor, LinearSystemId
 from pyfrc.physics.core import PhysicsInterface

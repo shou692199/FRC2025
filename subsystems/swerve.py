@@ -5,7 +5,7 @@ from wpilib import SmartDashboard
 from wpimath.controller import PIDController
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
-from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
+from wpimath.kinematics import ChassisSpeeds
 from ntcore import NetworkTableInstance
 from navx import AHRS
 from swervemodule import SwerveModule
