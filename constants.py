@@ -1,7 +1,7 @@
 import math
 from enum import Enum
-from wpimath.units import inchesToMeters
-from wpimath.geometry import Translation2d
+from wpimath.units import inchesToMeters, degreesToRadians
+from wpimath.geometry import Translation2d, Transform3d, Rotation3d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from pathplannerlib.config import RobotConfig
 from phoenix6 import CANBus
@@ -91,6 +91,11 @@ class OIConstants:
 
 class VisionConstants:
   kMainCameraName = "Microsoft_LifeCam_HD-3000"
+  kMainCameraTransform = Transform3d(
+    0.35, 0.105, 0.115, Rotation3d(0, degreesToRadians(15), 0)
+  )
+  kStateStdDevs = (0.05, 0.05, degreesToRadians(5))
+  kVisionMesurementStdDevs = (0.5, 0.5, degreesToRadians(30))
 
 class PhysicsConstants:
   kDriveMotorMOI = 0.0001
