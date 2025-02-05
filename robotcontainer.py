@@ -1,27 +1,31 @@
 from wpilib import SmartDashboard, DriverStation
-from commands.defaultdrive import DefaultDrive
-from commands.elevatorctrl import ElevatorCtrl
+from commands.auto import ChaseTag
+from commands.manual import DefaultDrive, ElevatorCtrl
 from commands2 import Command, InstantCommand
 from commands2.button import CommandXboxController
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
-from subsystems.swerve import Swerve
-from subsystems.elevator import Elevator
-from constants import AutoConstants, OIConstants, ReefLayers
+from subsystems import Swerve, Elevator, PoseEstimator
+from constants import AutoConstants, VisionConstants, OIConstants, ReefLayers
 
 class RobotContainer:
   def __init__(self):
     self.swerve = Swerve()
     self.elevator = Elevator()
-    self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
+    self.poseEstimator = PoseEstimator(
+      VisionConstants.kMainCameraPhoton,
+      VisionConstants.kMainCameraTransform,
+      self.swerve
+    )
 
+    self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
     self.configureButtonBindings()
 
     if not AutoBuilder.isConfigured():
       AutoBuilder.configure(
-        self.swerve.getPose,
-        self.swerve.resetOdometry,
+        self.poseEstimator.getPose,
+        self.poseEstimator.resetPose,
         self.swerve.getChassisSpeeds,
         lambda speed, _: self.swerve.driveRobotRelative(speed),
         PPHolonomicDriveController(
@@ -46,20 +50,30 @@ class RobotContainer:
     )
 
   def configureButtonBindings(self):
-    self.driverJoystick.y().onTrue(InstantCommand(self.swerve.zeroHeading))
-    self.driverJoystick.b().whileTrue(ElevatorCtrl(self.elevator, True))
-    self.driverJoystick.x().whileTrue(ElevatorCtrl(self.elevator, False))
+    self.driverJoystick.start().onTrue(
+      InstantCommand(lambda: self.poseEstimator.setVisionEnabled(True))
+    )
+    self.driverJoystick.back().onTrue(
+      InstantCommand(lambda: self.poseEstimator.setVisionEnabled(False))
+    )
+    self.driverJoystick.x().onTrue(
+      InstantCommand(lambda: self.swerve.zeroHeading(self.poseEstimator.getRotation2d())))
+    self.driverJoystick.y().whileTrue(ElevatorCtrl(self.elevator, True))
+    self.driverJoystick.a().whileTrue(ElevatorCtrl(self.elevator, False))
     self.driverJoystick.povUp().onTrue(
-      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L1))
+      InstantCommand(lambda: self.elevator.setDesiredHeight(ReefLayers.L1))
     )
     self.driverJoystick.povRight().onTrue(
-      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L2))
+      InstantCommand(lambda: self.elevator.setDesiredHeight(ReefLayers.L2))
     )
     self.driverJoystick.povDown().onTrue(
-      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L3))
+      InstantCommand(lambda: self.elevator.setDesiredHeight(ReefLayers.L3))
     )
     self.driverJoystick.povLeft().onTrue(
-      InstantCommand(lambda: self.elevator.setHeight(ReefLayers.L4))
+      InstantCommand(lambda: self.elevator.setDesiredHeight(ReefLayers.L4))
+    )
+    self.driverJoystick.leftBumper().whileTrue(
+      ChaseTag(VisionConstants.kMainCameraPhoton, self.swerve, self.poseEstimator.getPose)
     )
 
   def shouldFlipPath(self):

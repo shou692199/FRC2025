@@ -1,11 +1,11 @@
 import math
 import commands2
 from typing import Iterable
-from wpilib import SmartDashboard, Field2d
+from wpilib import SmartDashboard
 from wpimath.controller import PIDController
-from wpimath.geometry import Rotation2d, Pose2d
+from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveDrive4Kinematics
-from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds
+from wpimath.kinematics import ChassisSpeeds
 from ntcore import NetworkTableInstance
 from navx import AHRS
 from swervemodule import SwerveModule
@@ -43,38 +43,24 @@ class Swerve(commands2.Subsystem):
 
     self.modules = [self.frontLeft, self.frontRight, self.backLeft, self.backRight]
     self.gyro = AHRS(AHRS.NavXComType.kMXP_SPI)
-    self.odometer = SwerveDrive4Odometry(
-      DriveConstants.kDriveKinematics, Rotation2d(0), self.getModulePositions()
-    )
+    self.gyro.enableBoardlevelYawReset(True)
 
     self.desiredHeading = float(0)
     self.headingPIDController = PIDController(DriveConstants.kPHeading, 0, 0)
     self.headingPIDController.enableContinuousInput(-math.pi, math.pi)
-    
-    self.zeroHeading()
-
-    self.field = Field2d()
-    SmartDashboard.putData("Field", self.field)
 
     nt = NetworkTableInstance.getDefault()
-    self.moduleStatePublisher = nt.getStructArrayTopic("/SwerveStates", SwerveModuleState).publish()
-    self.pose2dPublisher = nt.getStructTopic("/SwervePose2d", Pose2d).publish()
+    self.statePublisher = nt.getStructArrayTopic("/SwerveStates", SwerveModuleState).publish()
 
-  def zeroHeading(self):
-    self.gyro.reset()
+  def zeroHeading(self, fieldRotation: Rotation2d):
+    self.gyro.setAngleAdjustment(-fieldRotation.degrees() - self.gyro.getYaw())
     self.desiredHeading = self.getRotation2d().radians()
   
-  def resetOdometry(self, pose: Pose2d):
-    self.odometer.resetPosition(self.getRotation2d(), self.getModulePositions(), pose)
+  def getRawRotation2d(self):
+    return Rotation2d.fromDegrees(-self.gyro.getYaw())
 
-  def getHeading(self):
-    return -self.gyro.getYaw()
-  
   def getRotation2d(self):
-    return Rotation2d.fromDegrees(self.getHeading())
-  
-  def getPose(self):
-    return self.odometer.getPose()
+    return self.gyro.getRotation2d()
   
   def getModulePositions(self):
     return tuple(m.getModulePosition() for m in self.modules)
@@ -110,7 +96,5 @@ class Swerve(commands2.Subsystem):
       m.stop()
 
   def periodic(self):
-    self.odometer.update(self.getRotation2d(), self.getModulePositions())
-    self.field.setRobotPose(self.getPose())
-    self.moduleStatePublisher.set(list(self.getModuleStates()))
-    self.pose2dPublisher.set(self.getPose())
+    self.statePublisher.set(list(self.getModuleStates()))
+    SmartDashboard.putNumber("Heading", self.getRotation2d().degrees())

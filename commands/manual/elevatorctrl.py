@@ -1,5 +1,5 @@
 import commands2
-from subsystems.elevator import Elevator
+from subsystems import Elevator
 from constants import ElevatorConstants
 
 class ElevatorCtrl(commands2.Command):

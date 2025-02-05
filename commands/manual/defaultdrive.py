@@ -4,7 +4,7 @@ from constants import DriveConstants, OIConstants
 from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpimath.kinematics import ChassisSpeeds
-from subsystems.swerve import Swerve
+from subsystems import Swerve
 
 class DefaultDrive(commands2.Command):
   def __init__(

@@ -1,6 +1,6 @@
 import commands2
 from wpilib import SmartDashboard
-from rev import SparkMax, SparkMaxConfig, LimitSwitchConfig, ClosedLoopConfig, MAXMotionConfig
+from rev import SparkMax, SparkMaxConfig, LimitSwitchConfig, ClosedLoopConfig
 from constants import ElevatorConstants, ReefLayers
 
 class Elevator(commands2.Subsystem):
@@ -57,7 +57,7 @@ class Elevator(commands2.Subsystem):
   def getHeight(self):
     return self.liftEncoder.getPosition()
 
-  def setHeight(self, height: float | ReefLayers):
+  def setDesiredHeight(self, height: float | ReefLayers):
     if type(height) is ReefLayers:
       height = height.value
     self.liftClosedLoopController.setReference(
@@ -68,7 +68,12 @@ class Elevator(commands2.Subsystem):
     self.liftMotor.set(speed)
 
   def stop(self):
-    self.liftMotor.set(0)
+    height = self.getHeight()
+    if height > ElevatorConstants.kForwardLimitMeters:
+      height = ElevatorConstants.kForwardLimitMeters
+    elif height < ElevatorConstants.kReverseLimitMeters:
+      height = ElevatorConstants.kReverseLimitMeters
+    self.setDesiredHeight(height)
 
   def periodic(self):
     SmartDashboard.putNumber("Elevator Height", self.getHeight())

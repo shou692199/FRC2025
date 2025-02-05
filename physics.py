@@ -1,7 +1,7 @@
 import math
 import typing
 from wpilib.simulation import DCMotorSim, SimDeviceSim, ElevatorSim, RoboRioSim, BatterySim
-from wpilib import RobotController, DriverStation, SmartDashboard, Mechanism2d
+from wpilib import DriverStation, SmartDashboard, Mechanism2d
 from wpimath.units import radiansToRotations
 from wpimath.system.plant import DCMotor, LinearSystemId
 from pyfrc.physics.core import PhysicsInterface
@@ -65,7 +65,9 @@ class SwervePhysics:
 
     chassisSpeeds = self.swerve.getChassisSpeeds()
     if abs(chassisSpeeds.omega) > DriveConstants.kDeadband:
-      self.gyroAngleSim.set(-(self.swerve.getHeading() + chassisSpeeds.omega_dps * tm_diff))
+      self.gyroAngleSim.set(
+        -(self.swerve.getRawRotation2d().degrees() + chassisSpeeds.omega_dps * tm_diff)
+      )
 
   def getCurrentDraw(self):
     currentDraw = []
