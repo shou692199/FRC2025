@@ -1,11 +1,11 @@
 from wpilib import SmartDashboard, DriverStation
+from commands.auto import ChaseTag
 from commands.manual import DefaultDrive, ElevatorCtrl
 from commands2 import Command, InstantCommand
 from commands2.button import CommandXboxController
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
-from photonlibpy.photonCamera import PhotonCamera
 from subsystems import Swerve, Elevator, PoseEstimator
 from constants import AutoConstants, VisionConstants, OIConstants, ReefLayers
 
@@ -14,7 +14,7 @@ class RobotContainer:
     self.swerve = Swerve()
     self.elevator = Elevator()
     self.poseEstimator = PoseEstimator(
-      PhotonCamera(VisionConstants.kMainCameraName),
+      VisionConstants.kMainCameraPhoton,
       VisionConstants.kMainCameraTransform,
       self.swerve
     )
@@ -24,8 +24,8 @@ class RobotContainer:
 
     if not AutoBuilder.isConfigured():
       AutoBuilder.configure(
-        self.poseEstimator.getEstimatedPose,
-        self.poseEstimator.resetOdometry,
+        self.poseEstimator.getPose,
+        self.poseEstimator.resetPose,
         self.swerve.getChassisSpeeds,
         lambda speed, _: self.swerve.driveRobotRelative(speed),
         PPHolonomicDriveController(
@@ -50,7 +50,14 @@ class RobotContainer:
     )
 
   def configureButtonBindings(self):
-    self.driverJoystick.start().onTrue(InstantCommand(self.swerve.zeroHeading))
+    self.driverJoystick.start().onTrue(
+      InstantCommand(lambda: self.poseEstimator.setVisionEnabled(True))
+    )
+    self.driverJoystick.back().onTrue(
+      InstantCommand(lambda: self.poseEstimator.setVisionEnabled(False))
+    )
+    self.driverJoystick.x().onTrue(
+      InstantCommand(lambda: self.swerve.zeroHeading(self.poseEstimator.getRotation2d())))
     self.driverJoystick.y().whileTrue(ElevatorCtrl(self.elevator, True))
     self.driverJoystick.a().whileTrue(ElevatorCtrl(self.elevator, False))
     self.driverJoystick.povUp().onTrue(
@@ -64,6 +71,9 @@ class RobotContainer:
     )
     self.driverJoystick.povLeft().onTrue(
       InstantCommand(lambda: self.elevator.setDesiredHeight(ReefLayers.L4))
+    )
+    self.driverJoystick.leftBumper().whileTrue(
+      ChaseTag(VisionConstants.kMainCameraPhoton, self.swerve, self.poseEstimator.getPose)
     )
 
   def shouldFlipPath(self):

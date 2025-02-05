@@ -2,6 +2,7 @@ import math
 from enum import Enum
 from wpimath.units import inchesToMeters, degreesToRadians
 from wpimath.geometry import Translation2d, Transform3d, Rotation3d
+from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from wpimath.kinematics import SwerveDrive4Kinematics
 from pathplannerlib.config import RobotConfig
 from photonlibpy.photonCamera import PhotonCamera
@@ -86,6 +87,31 @@ class AutoConstants:
   kPTranslation = 0.5
   kPRotation = 3.2
 
+class ChaseTagConstants:
+  kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 2
+  kMaxAngularSpeedRadiansPerSecond = DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond / 5
+  kMaxAccelerationMetersPerSecondSquared = 3
+  kMaxAngularAccelerationRadiansPerSecondSquared = math.pi / 2
+  kPXController = 0.6
+  kPYController = 0.6
+  kPOController = 1.5
+
+  kXControllerConstraints = TrapezoidProfile.Constraints(
+    kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared
+  )
+  kYControllerConstraints = TrapezoidProfile.Constraints(
+    kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared
+  )
+  kOControllerConstraints = TrapezoidProfileRadians.Constraints(
+    kMaxAngularSpeedRadiansPerSecond, kMaxAngularAccelerationRadiansPerSecondSquared
+  )
+
+  kXToleranceMeters = 0.1
+  kYToleranceMeters = 0.1
+  kOToleranceRadians = degreesToRadians(3)
+
+  kTag2GoalTransform = Transform3d(0.5, 0, 0, Rotation3d(0, 0, math.pi))
+
 class OIConstants:
   kDriverControllerPort = 0
   kDeadband = 0.06
@@ -93,7 +119,7 @@ class OIConstants:
 class VisionConstants:
   kMainCameraPhoton = PhotonCamera("Microsoft_LifeCam_HD-3000")
   kMainCameraTransform = Transform3d(
-    0.35, 0.105, 0.115, Rotation3d(0, degreesToRadians(15), 0)
+    0.35, 0.11, 0.115, Rotation3d(0, degreesToRadians(15), 0)
   )
   kStateStdDevs = (0.05, 0.05, degreesToRadians(5))
   kVisionMesurementStdDevs = (0.5, 0.5, degreesToRadians(30))

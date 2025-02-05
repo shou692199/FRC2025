@@ -48,21 +48,19 @@ class Swerve(commands2.Subsystem):
     self.desiredHeading = float(0)
     self.headingPIDController = PIDController(DriveConstants.kPHeading, 0, 0)
     self.headingPIDController.enableContinuousInput(-math.pi, math.pi)
-    
-    self.zeroHeading()
 
     nt = NetworkTableInstance.getDefault()
     self.statePublisher = nt.getStructArrayTopic("/SwerveStates", SwerveModuleState).publish()
 
-  def zeroHeading(self):
-    self.gyro.reset()
+  def zeroHeading(self, fieldRotation: Rotation2d):
+    self.gyro.setAngleAdjustment(-fieldRotation.degrees() - self.gyro.getYaw())
     self.desiredHeading = self.getRotation2d().radians()
-
-  def getHeading(self):
-    return -self.gyro.getYaw()
   
+  def getRawRotation2d(self):
+    return Rotation2d.fromDegrees(-self.gyro.getYaw())
+
   def getRotation2d(self):
-    return Rotation2d.fromDegrees(self.getHeading())
+    return self.gyro.getRotation2d()
   
   def getModulePositions(self):
     return tuple(m.getModulePosition() for m in self.modules)

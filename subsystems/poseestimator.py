@@ -37,17 +37,25 @@ class PoseEstimator(commands2.Subsystem):
 
     nt = NetworkTableInstance.getDefault()
     self.posePublisher = nt.getStructTopic("/SwervePose", Pose2d).publish()
+    self.visionEnabled = True
 
-  def resetOdometry(self, pose: Pose2d):
+  def resetPose(self, pose: Pose2d):
     self.poseEstimator.resetPose(pose)
 
-  def getEstimatedPose(self):
+  def getPose(self):
     return self.poseEstimator.getEstimatedPosition()
+  
+  def getRotation2d(self):
+    return self.getPose().rotation()
+
+  def setVisionEnabled(self, enabled: bool):
+    self.visionEnabled = enabled
 
   def periodic(self):
     estimatedPose = self.photonPoseEstimator.update()
-    if estimatedPose:
+    if estimatedPose and self.visionEnabled:
       self.poseEstimator.addVisionMeasurement(
         estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds)
-    self.poseEstimator.update(self.swerve.getRotation2d(), self.swerve.getModulePositions())
-    self.posePublisher.set(self.getEstimatedPose())
+    self.poseEstimator.update(self.swerve.getRawRotation2d(), self.swerve.getModulePositions())
+    self.posePublisher.set(self.getPose())
+    SmartDashboard.putBoolean("Vision Pose", self.visionEnabled)

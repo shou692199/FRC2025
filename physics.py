@@ -65,7 +65,9 @@ class SwervePhysics:
 
     chassisSpeeds = self.swerve.getChassisSpeeds()
     if abs(chassisSpeeds.omega) > DriveConstants.kDeadband:
-      self.gyroAngleSim.set(-(self.swerve.getHeading() + chassisSpeeds.omega_dps * tm_diff))
+      self.gyroAngleSim.set(
+        -(self.swerve.getRawRotation2d().degrees() + chassisSpeeds.omega_dps * tm_diff)
+      )
 
   def getCurrentDraw(self):
     currentDraw = []
