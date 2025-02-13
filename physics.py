@@ -56,7 +56,7 @@ class SwerveModulePhysics:
 class SwervePhysics:
   def __init__(self, swerve: Swerve):
     self.swerve = swerve
-    self.modulesSim = [SwerveModulePhysics(m) for m in swerve.modules]
+    self.modulesSim = [SwerveModulePhysics(m) for m in self.swerve.modules]
     self.gyroAngleSim = SimDeviceSim(PhysicsConstants.kGyroSimDevice).getDouble("Yaw")
   
   def drive(self, tm_diff: float):
@@ -82,16 +82,16 @@ class ElevatorPhysics:
     gearbox = DCMotor.NEO(2)
     self.elevatorSim = ElevatorSim(
       gearbox,
-      1 / ElevatorConstants.kLiftMotorGearRatio,
+      1 / ElevatorConstants.kMotorGearRatio,
       PhysicsConstants.kElevatorMassKilograms,
-      ElevatorConstants.kChainPitchMeters * ElevatorConstants.kChainWheelTeeth / math.pi,
+      ElevatorConstants.kChainPitchMeters * ElevatorConstants.kSprocketTeeth / math.pi,
       ElevatorConstants.kReverseLimitMeters,
       ElevatorConstants.kForwardLimitMeters,
       PhysicsConstants.kElevatorSimGravity,
       ElevatorConstants.kReverseLimitMeters,
       [PhysicsConstants.kLiftMotorStdDevs, 0.0]
     )
-    self.liftMotorSim = SparkMaxSim(elevator.liftMotor, gearbox)
+    self.liftMotorSim = SparkMaxSim(self.elevator.motor, gearbox)
 
     self.mechanism = Mechanism2d(20, 50)
     self.elevatorRoot = self.mechanism.getRoot("Elevator Root", 10, 0)

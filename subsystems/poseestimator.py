@@ -16,8 +16,6 @@ class PoseEstimator(commands2.Subsystem):
     cameraTransform: Transform3d,
     swerve: Swerve
   ):
-    self.camera = camera
-    self.cameraTransform = cameraTransform
     self.swerve = swerve
 
     self.photonPoseEstimator = PhotonPoseEstimator(

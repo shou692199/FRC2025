@@ -1,79 +1,73 @@
+import math
 import commands2
 from wpilib import SmartDashboard
 from rev import SparkMax, SparkMaxConfig, LimitSwitchConfig, ClosedLoopConfig
-from constants import ElevatorConstants, ReefLayers
+from constants import ElevatorConstants
 
 class Elevator(commands2.Subsystem):
   def __init__(self):
-    self.liftMotor = SparkMax(
-      ElevatorConstants.kLiftMotorId, SparkMax.MotorType.kBrushless
+    self.motor = SparkMax(
+      ElevatorConstants.kMotorId, SparkMax.MotorType.kBrushless
     )
-    self.liftMotorSub = SparkMax(
-      ElevatorConstants.kLiftMotorSubId, SparkMax.MotorType.kBrushless
-    )
-
-    self.liftEncoder = self.liftMotor.getEncoder()
-    self.liftClosedLoopController = self.liftMotor.getClosedLoopController()
-
-    cfg_lift = SparkMaxConfig()
-    cfg_lift.setIdleMode(SparkMaxConfig.IdleMode.kBrake)
-    cfg_lift.smartCurrentLimit(ElevatorConstants.kSmartCurrentLimit)
-
-    cfg_lift.encoder.positionConversionFactor(ElevatorConstants.kLiftEncoderRot2Meter)
-    cfg_lift.encoder.velocityConversionFactor(ElevatorConstants.kLiftEncoderRot2Meter / 60)
-
-    cfg_lift.limitSwitch.forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
-    cfg_lift.limitSwitch.forwardLimitSwitchEnabled(True)
-    cfg_lift.limitSwitch.reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
-    cfg_lift.limitSwitch.reverseLimitSwitchEnabled(True)
-    cfg_lift.softLimit.forwardSoftLimit(ElevatorConstants.kForwardLimitMeters)
-    cfg_lift.softLimit.forwardSoftLimitEnabled(True)
-    cfg_lift.softLimit.reverseSoftLimit(ElevatorConstants.kReverseLimitMeters)
-    cfg_lift.softLimit.reverseSoftLimitEnabled(True)
-
-    cfg_lift.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
-    cfg_lift.closedLoop.pid(ElevatorConstants.kPLiftMotor, 0, 0)
-    cfg_lift.closedLoop.outputRange(
-      -ElevatorConstants.kAutoMaxDutyCycle, ElevatorConstants.kAutoMaxDutyCycle
+    self.motorSub = SparkMax(
+      ElevatorConstants.kMotorSubId, SparkMax.MotorType.kBrushless
     )
 
-    self.liftMotor.configure(
-      cfg_lift,
+    self.encoder = self.motor.getEncoder()
+    self.closedLoopController = self.motor.getClosedLoopController()
+
+    cfg = SparkMaxConfig()
+    cfg.setIdleMode(SparkMaxConfig.IdleMode.kBrake)
+    cfg.smartCurrentLimit(ElevatorConstants.kSmartCurrentLimit)
+
+    cfg.encoder.positionConversionFactor(ElevatorConstants.kEncoderRot2Meter)
+    cfg.encoder.velocityConversionFactor(ElevatorConstants.kEncoderRot2Meter / 60)
+
+    cfg.limitSwitch.forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
+    cfg.limitSwitch.forwardLimitSwitchEnabled(True)
+    cfg.limitSwitch.reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
+    cfg.limitSwitch.reverseLimitSwitchEnabled(True)
+    cfg.softLimit.forwardSoftLimit(ElevatorConstants.kForwardLimitMeters)
+    cfg.softLimit.forwardSoftLimitEnabled(True)
+    cfg.softLimit.reverseSoftLimit(ElevatorConstants.kReverseLimitMeters)
+    cfg.softLimit.reverseSoftLimitEnabled(True)
+
+    cfg.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+    cfg.closedLoop.P(ElevatorConstants.kPMotorPosition)
+    cfg.closedLoop.outputRange(
+      -ElevatorConstants.kMaxOutput, ElevatorConstants.kMaxOutput
+    )
+
+    self.motor.configure(
+      cfg,
       SparkMax.ResetMode.kResetSafeParameters,
-      SparkMax.PersistMode.kNoPersistParameters
+      SparkMax.PersistMode.kPersistParameters
     )
 
-    self.liftMotorSub.configure(
-      SparkMaxConfig().apply(cfg_lift).follow(self.liftMotor, True),
+    self.motorSub.configure(
+      SparkMaxConfig().apply(cfg).follow(self.motor, True),
       SparkMax.ResetMode.kResetSafeParameters,
-      SparkMax.PersistMode.kNoPersistParameters
+      SparkMax.PersistMode.kPersistParameters
     )
 
     self.resetEncoders()
+    self.desiredHeight = float(0)
 
   def resetEncoders(self):
-    self.liftEncoder.setPosition(0)
+    self.encoder.setPosition(0)
 
   def getHeight(self):
-    return self.liftEncoder.getPosition()
+    return self.encoder.getPosition()
 
-  def setDesiredHeight(self, height: float | ReefLayers):
-    if type(height) is ReefLayers:
-      height = height.value
-    self.liftClosedLoopController.setReference(
-      height, SparkMax.ControlType.kPosition
-    )
+  def setGoalHeight(self, height: float):
+    self.desiredHeight = height
+    self.closedLoopController.setReference(height, SparkMax.ControlType.kPosition)
 
-  def setSpeed(self, speed: float):
-    self.liftMotor.set(speed)
+  def atGoalHeight(self):
+    return math.isclose(self.getHeight(), self.desiredHeight, abs_tol=0.02)
 
   def stop(self):
-    height = self.getHeight()
-    if height > ElevatorConstants.kForwardLimitMeters:
-      height = ElevatorConstants.kForwardLimitMeters
-    elif height < ElevatorConstants.kReverseLimitMeters:
-      height = ElevatorConstants.kReverseLimitMeters
-    self.setDesiredHeight(height)
+    self.motor.stopMotor()
 
   def periodic(self):
     SmartDashboard.putNumber("Elevator Height", self.getHeight())

@@ -6,7 +6,7 @@ from wpimath.filter import SlewRateLimiter
 from wpimath.kinematics import ChassisSpeeds
 from subsystems import Swerve
 
-class DefaultDrive(commands2.Command):
+class DriveJoystick(commands2.Command):
   def __init__(
       self,
       swerve: Swerve,
@@ -33,14 +33,15 @@ class DefaultDrive(commands2.Command):
     ySpeed = self.yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond
     oSpeed = self.oLimiter.calculate(oSpeed) * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond
 
-    chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-      xSpeed, ySpeed, oSpeed, self.swerve.getRotation2d()
-    )
+    #chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+    #  xSpeed, ySpeed, oSpeed, self.swerve.getRotation2d()
+    #)
+    chassisSpeeds = ChassisSpeeds(xSpeed, ySpeed, oSpeed)
     
     self.swerve.driveRobotRelative(chassisSpeeds)
 
   def end(self, interrupted):
-    self.swerve.stopModules()
+    self.swerve.stop()
 
   def isFinished(self):
     return False

@@ -91,7 +91,7 @@ class Swerve(commands2.Subsystem):
     moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds)
     self.setModuleStates(moduleStates)
 
-  def stopModules(self):
+  def stop(self):
     for m in self.modules:
       m.stop()
 

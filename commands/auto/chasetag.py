@@ -55,9 +55,9 @@ class ChaseTag(commands2.Command):
   def execute(self):
     target = None
     robotPose = Pose3d(self.getPose())
-    cameraResult = self.camera.getLatestResult()
-    if cameraResult.hasTargets():
-      for t in cameraResult.getTargets():
+    cameraResults = self.camera.getAllUnreadResults()
+    if len(cameraResults):
+      for t in cameraResults[-1].getTargets():
         if t.getFiducialId() == 3 and t.getPoseAmbiguity() < 0.5:
           target = t
           break
@@ -77,12 +77,22 @@ class ChaseTag(commands2.Command):
       ySpeed = self.yController.calculate(robotPose.Y())
       oSpeed = self.oController.calculate(robotPose.rotation().toRotation2d().radians())
 
+      if self.xController.atGoal():
+        xSpeed = 0
+      if self.yController.atGoal():
+        ySpeed = 0
+      if self.oController.atGoal():
+        oSpeed = 0
+
       chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
         xSpeed, ySpeed, oSpeed, robotPose.rotation().toRotation2d()
       )
       self.swerve.driveRobotRelative(chassisSpeeds)
     else:
-      self.swerve.stopModules()
+      self.swerve.stop()
     
   def end(self, interrupted):
-    self.swerve.stopModules()
+    self.swerve.stop()
+
+  def isFinished(self):
+    return self.xController.atGoal() and self.yController.atGoal() and self.oController.atGoal()
