@@ -15,7 +15,7 @@ class ModuleConstants:
   kDriveEncoderRot2Meter = kDriveMotorGearRatio * math.pi * kWheelDiameterMeters
   kDriveMotorMaxRPM = 6380
   kDriveMotorNominalVoltage = 12
-  kPDriveMotor = 0.8
+  kPDriveMotor = 0.95
   kSDriveMotor = 0.04
   kVDriveMotor = kDriveMotorNominalVoltage * 60 / kDriveEncoderRot2Meter / kDriveMotorMaxRPM
   kPSteerMotor = 0.7
@@ -70,9 +70,9 @@ class ElevatorConstants:
   kEncoderRot2Meter = kMotorGearRatio * kSprocketTeeth * kChainPitchMeters * 2
 
   kSmartCurrentLimit = 50
-  kForwardLimitMeters = 1.3
+  kForwardLimitMeters = 1.33
   kReverseLimitMeters = 0
-  kMaxOutput = 0.3
+  kMaxOutput = 0.35
   kPMotorPosition = 20
 
 class ShooterConstants:
@@ -94,17 +94,17 @@ class ClimberConstants:
   kMotorId = 18
   kMotorSubId = 19
   kSmartCurrentLimit = 40
-  kAbsoluteEncoderOffset = 0.56
+  kAbsoluteEncoderOffset = 0.69
 
 class MotionPresets(Enum):
-  CORAL_STATION = (0.25, 0)
+  CORAL_STATION = (0.2, 0)
   PROCCESSOR = (0.10, -10)
   SCORE_L1 = (0.35, -60)
-  SCORE_L2 = (0.50, -55)
-  SCORE_L3 = (0.85, -55)
-  SCORE_L4 = (1.30, -30)
+  SCORE_L2 = (0.52, -55)
+  SCORE_L3 = (0.90, -55)
+  SCORE_L4 = (1.33, -25)
   REEF_L2 = (0.50, -10)
-  REEF_L3 = (0.80, -10)
+  REEF_L3 = (0.85, -5)
   HOME = (0.0, 0.0)
 
 class OperationMode(Enum):
@@ -141,7 +141,7 @@ class ChaseTagConstants:
   kYToleranceMeters = 0.1
   kOToleranceRadians = degreesToRadians(3)
 
-  kTag2GoalTransform = Transform3d(1.5, 0, 0, Rotation3d(0, 0, math.pi))
+  kTag2GoalTransform = Transform3d(1.5, 0, 0, Rotation3d(0, 0, 0))
 
 class OIConstants:
   kDriverControllerPort = 0
@@ -151,7 +151,7 @@ class OIConstants:
 class VisionConstants:
   kMainCameraPhoton = PhotonCamera("Microsoft_LifeCam_HD-3000")
   kMainCameraTransform = Transform3d(
-    -0.11, 0.315, 0.385, Rotation3d(0, 0, math.pi)
+    -0.10, 0.30, 0.38, Rotation3d(0, 0, math.pi)
   )
   kStateStdDevs = (0.05, 0.05, degreesToRadians(5))
   kVisionMesurementStdDevs = (0.5, 0.5, degreesToRadians(30))

@@ -1,5 +1,6 @@
 import math
 import commands2
+from wpilib import SmartDashboard
 from rev import SparkMax, SparkMaxConfig, ClosedLoopConfig
 from constants import ClimberConstants
 
@@ -16,7 +17,6 @@ class Climber(commands2.Subsystem):
     self.closedLoopController = self.motor.getClosedLoopController()
 
     cfg = SparkMaxConfig()
-    cfg.inverted(True)
     cfg.setIdleMode(SparkMaxConfig.IdleMode.kBrake)
     cfg.smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
 
@@ -26,7 +26,7 @@ class Climber(commands2.Subsystem):
 
     cfg.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder)
     cfg.closedLoop.P(0.1)
-    cfg.closedLoop.outputRange(-0.1, 0.2)
+    cfg.closedLoop.outputRange(-0.2, 0.4)
 
     self.motor.configure(
       cfg,
@@ -48,7 +48,10 @@ class Climber(commands2.Subsystem):
     self.closedLoopController.setReference(angle, SparkMax.ControlType.kPosition)
 
   def atGoalAngle(self):
-    return math.isclose(self.getAngle(), self.desiredAngle, abs_tol=3)
+    return math.isclose(self.getAngle(), self.desiredAngle, abs_tol=5)
 
   def stop(self):
     self.motor.stopMotor()
+
+  def periodic(self):
+    SmartDashboard.putNumber("Climber Angle", self.getAngle())

@@ -8,7 +8,7 @@ class ClimbCage(Command):
     self.addRequirements(self.climber)
     
   def initialize(self):
-    self.climber.setGoalAngle(45)
+    self.climber.setGoalAngle(50)
 
   def end(self, interrupted):
     if interrupted:

@@ -52,8 +52,12 @@ class PoseEstimator(commands2.Subsystem):
   def periodic(self):
     estimatedPose = self.photonPoseEstimator.update()
     if estimatedPose and self.visionEnabled:
-      self.poseEstimator.addVisionMeasurement(
-        estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds)
+      singleTarget = estimatedPose.targetsUsed[0]
+      cameraToTarget = singleTarget.getBestCameraToTarget()
+      distance = (cameraToTarget.x**2 + cameraToTarget.y**2)**0.5
+      if singleTarget.getPoseAmbiguity() <= 0.25 and distance <= 4:
+        self.poseEstimator.addVisionMeasurement(
+          estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds)
     self.poseEstimator.update(self.swerve.getRawRotation2d(), self.swerve.getModulePositions())
     self.posePublisher.set(self.getPose())
     SmartDashboard.putBoolean("Vision Pose", self.visionEnabled)

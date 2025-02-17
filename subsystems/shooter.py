@@ -69,7 +69,7 @@ class Shooter(Subsystem):
     cfg_roller.smartCurrentLimit(ShooterConstants.kSmartCurrentLimit)
 
     cfg_roller.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
-    cfg_roller.closedLoop.P(0.001)
+    cfg_roller.closedLoop.P(0.05)
 
     self.rollerMotor.configure(
       cfg_roller,
@@ -98,19 +98,17 @@ class Shooter(Subsystem):
 
   def outtakeCoralCommand(self, slowdown = False) -> Command:
     return InstantCommand(
-      lambda: self.rollerMotor.set(-0.2 if slowdown else -0.5)
+      lambda: self.rollerMotor.set(-0.3 if slowdown else -0.8)
     )
 
   def intakeAlgaeCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(-0.5))
+    return InstantCommand(lambda: self.rollerMotor.set(-0.7))
 
   def outtakeAlgaeCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(1))
 
-  def holdRoller(self):
-    self.rollerClosedLoopController.setReference(
-      self.rollerEncoder.getPosition(), SparkMax.ControlType.kPosition
-    )
+  def holdAlgaeCommand(self) -> Command:
+    return InstantCommand(lambda: self.rollerMotor.set(-0.2))
 
   def stopRoller(self):
     self.rollerMotor.stopMotor()

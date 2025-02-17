@@ -4,7 +4,7 @@ from phoenix6 import BaseStatusSignal
 from phoenix6.configs import CANcoderConfiguration, TalonFXConfiguration
 from phoenix6.configs.config_groups import SensorDirectionValue
 from phoenix6.configs.config_groups import InvertedValue, NeutralModeValue
-from phoenix6.controls import NeutralOut, VelocityVoltage, PositionDutyCycle
+from phoenix6.controls import StaticBrake, VelocityVoltage, PositionDutyCycle
 from phoenix6.hardware import CANcoder, TalonFX
 from phoenix6.signals import FeedbackSensorSourceValue
 from wpimath.geometry import Rotation2d
@@ -102,5 +102,5 @@ class SwerveModule:
     )
 
   def stop(self):
-    self.driveMotor.set_control(NeutralOut())
-    self.steerMotor.set_control(NeutralOut())
+    self.driveMotor.set_control(StaticBrake())
+    self.steerMotor.set_control(StaticBrake())

@@ -1,16 +1,15 @@
 from commands2 import Command
 from subsystems import Shooter
-from constants import MotionPresets
 
 class SetShooterPitch(Command):
-  def __init__(self, shooter: Shooter, preset: MotionPresets):
+  def __init__(self, shooter: Shooter, pitch: float):
     self.shooter = shooter
-    self.preset = preset
+    self.pitch = pitch
 
     self.addRequirements(self.shooter)
     
   def initialize(self):
-    self.shooter.setGoalPitch(self.preset.value[1])
+    self.shooter.setGoalPitch(self.pitch)
 
   def isFinished(self):
     return self.shooter.atGoalPitch()
