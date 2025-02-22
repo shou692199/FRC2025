@@ -24,7 +24,7 @@ class Climber(commands2.Subsystem):
     cfg.absoluteEncoder.zeroOffset(ClimberConstants.kAbsoluteEncoderOffset)
     cfg.absoluteEncoder.positionConversionFactor(360)
 
-    cfg.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder)
+    cfg.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg.closedLoop.P(0.1)
     cfg.closedLoop.outputRange(-0.2, 0.4)
 
@@ -49,6 +49,12 @@ class Climber(commands2.Subsystem):
 
   def atGoalAngle(self):
     return math.isclose(self.getAngle(), self.desiredAngle, abs_tol=5)
+
+  def setSpeed(self, speed: float):
+    if speed < 0.001:
+      #self.setGoalAngle(self.getAngle())
+      return
+    self.motor.set(speed)
 
   def stop(self):
     self.motor.stopMotor()

@@ -8,10 +8,10 @@ class ReleaseClimber(Command):
     self.addRequirements(self.climber)
     
   def initialize(self):
-    self.climber.setGoalAngle(0)
+    self.climber.setSpeed(-0.2)
 
   def end(self, interrupted):
     self.climber.stop()
 
   def isFinished(self):
-    return self.climber.atGoalAngle()
+    return False#self.climber.atGoalAngle()

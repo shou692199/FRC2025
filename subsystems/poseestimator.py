@@ -19,7 +19,7 @@ class PoseEstimator(commands2.Subsystem):
     self.swerve = swerve
 
     self.photonPoseEstimator = PhotonPoseEstimator(
-      AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape),
+      AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeAndyMark),
       PoseStrategy.LOWEST_AMBIGUITY,
       camera,
       cameraTransform

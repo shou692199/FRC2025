@@ -130,6 +130,7 @@ class RobotContainer:
     self.operatorJoystick.rightBumper().onTrue(
       GotoPreset(self.elevator, self.shooter, MotionPresets.REEF_L3)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
+    self.operatorJoystick.leftStick().onTrue(InstantCommand(self.stopAll))
     self.operatorJoystick.x().onTrue(
       GotoPreset(self.elevator, self.shooter, MotionPresets.PROCCESSOR)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
@@ -177,6 +178,7 @@ class RobotContainer:
     self.climber.stop()
 
   def getAutonomousCommand(self) -> Command:
+    return None
     autoCommand = self.autoChooser.getSelected()
     selstr = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
@@ -198,7 +200,6 @@ class RobotContainer:
           ).andThen(ShootAlgae(self.shooter))
         )
       )
-      
     return autoCommand
 
   def getPathfindThenFollowPathCommand(self, pathName: str):
@@ -212,4 +213,3 @@ class RobotContainer:
       constraints
     )
     return pathfindingCommand
-
