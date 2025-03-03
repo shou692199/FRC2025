@@ -80,4 +80,4 @@ class PoseEstimator(commands2.Subsystem):
     self.poseEstimator.update(self.swerve.getRawRotation2d(), self.swerve.getModulePositions())
     self.posePublisher.set(self.getPose())
     SmartDashboard.putBoolean("Vision Enabled", self.visionEnabled)
-    SmartDashboard.putNumber("Vision Timestamp", self.visionTimestamp)
+    SmartDashboard.putNumber("Vision Available", self.isVisionAvailable())
