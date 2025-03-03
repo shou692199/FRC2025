@@ -64,7 +64,7 @@ class ChaseTag(commands2.Command):
 
     if target:
       self.lastTarget = target
-      cameraPose = robotPose.transformBy(VisionConstants.kMainCameraTransform)
+      cameraPose = robotPose.transformBy(VisionConstants.kLowCameraTransform)
       targetPose = cameraPose.transformBy(target.getBestCameraToTarget())
       goalPose = targetPose.transformBy(ChaseTagConstants.kTag2GoalTransform).toPose2d()
 

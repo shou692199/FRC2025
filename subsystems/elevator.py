@@ -34,12 +34,10 @@ class Elevator(commands2.Subsystem):
 
     cfg.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg.closedLoop.P(ElevatorConstants.kPMotorPosition)
+    cfg.closedLoop.D(0.01)
     cfg.closedLoop.outputRange(
       -ElevatorConstants.kMaxOutput, ElevatorConstants.kMaxOutput
     )
-    cfg.closedLoop.maxMotion.maxVelocity(2)
-    cfg.closedLoop.maxMotion.maxAcceleration(3)
-    cfg.closedLoop.maxMotion.allowedClosedLoopError(0.005)
 
     self.motor.configure(
       cfg,
@@ -64,16 +62,10 @@ class Elevator(commands2.Subsystem):
 
   def setGoalHeight(self, height: float):
     self.desiredHeight = height
-    self.closedLoopController.setReference(height, SparkMax.ControlType.kMAXMotionPositionControl)
+    self.closedLoopController.setReference(height, SparkMax.ControlType.kPosition)
 
   def atGoalHeight(self):
     return math.isclose(self.getHeight(), self.desiredHeight, abs_tol=0.02)
-
-  def setSpeed(self, speed: float):
-    if speed < 0.001:
-      self.setGoalHeight(self.getHeight())
-      return
-    self.motor.set(speed)
 
   def stop(self):
     self.motor.stopMotor()

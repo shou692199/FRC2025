@@ -6,6 +6,4 @@ from .intakecoral import IntakeCoral
 from .releaseclimber import ReleaseClimber
 from .scorecoral import ScoreCoral
 from .scorecoralslow import ScoreCoralSlow
-from .setelevatorheight import SetElevatorHeight
-from .setshooterpitch import SetShooterPitch
 from .shootalgae import ShootAlgae

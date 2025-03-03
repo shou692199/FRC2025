@@ -1,27 +1,24 @@
 from wpilib import SmartDashboard, DriverStation
 from wpimath.units import degreesToRadians
 from commands import ClimbCage, DriveJoystick, GotoPreset, IntakeAlgae, IntakeCoral, ReleaseClimber
-from commands import ScoreCoral, ScoreCoralSlow, SetElevatorHeight, SetShooterPitch, ShootAlgae
-from commands2 import Command, InstantCommand, WaitCommand, RepeatCommand, ParallelCommandGroup, SequentialCommandGroup
+from commands import ScoreCoral, ScoreCoralSlow, ShootAlgae
+from commands2 import Command, InstantCommand, WaitCommand, ParallelCommandGroup, SequentialCommandGroup
 from commands2.button import CommandXboxController
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
 from pathplannerlib.path import PathPlannerPath, PathConstraints
-from subsystems import Swerve, Elevator, Shooter, Climber, PoseEstimator
-from constants import AutoConstants, VisionConstants, OIConstants, MotionPresets, OperationMode
+from subsystems import Swerve, Elevator, Shooter, Pivot, Climber, PoseEstimator
+from constants import AutoConstants, OIConstants, MotionPresets, OperationMode
 
 class RobotContainer:
   def __init__(self):
     self.swerve = Swerve()
     self.elevator = Elevator()
     self.shooter = Shooter()
+    self.pivot = Pivot()
     self.climber = Climber()
-    self.poseEstimator = PoseEstimator(
-      VisionConstants.kMainCameraPhoton,
-      VisionConstants.kMainCameraTransform,
-      self.swerve
-    )
+    self.poseEstimator = PoseEstimator(self.swerve)
 
     self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
     self.operatorJoystick = CommandXboxController(OIConstants.kOperatorControllerPort)
@@ -62,23 +59,23 @@ class RobotContainer:
 
   def registerNamedCommands(self):
     NamedCommands.registerCommand(
-      "Goto Preset SCORE_L1", GotoPreset(self.elevator, self.shooter, MotionPresets.SCORE_L1)
+      "Goto Preset SCORE_L1", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1)
     )
     NamedCommands.registerCommand(
-      "Goto Preset REEF_L2", GotoPreset(self.elevator, self.shooter, MotionPresets.REEF_L2)
+      "Goto Preset REEF_L2", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L2)
     )
     NamedCommands.registerCommand(
-      "Goto Preset REEF_L3", GotoPreset(self.elevator, self.shooter, MotionPresets.REEF_L3)
+      "Goto Preset REEF_L3", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L3)
     )
     NamedCommands.registerCommand(
-      "Goto Preset PROCCESSOR", GotoPreset(self.elevator, self.shooter, MotionPresets.PROCCESSOR)
+      "Goto Preset PROCCESSOR", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
     )
     NamedCommands.registerCommand("Intake Algae", IntakeAlgae(self.shooter))
     NamedCommands.registerCommand("Intake Coral", IntakeCoral(self.shooter))
     NamedCommands.registerCommand("Score Coral", ScoreCoral(self.shooter))
     NamedCommands.registerCommand("Score Coral Slow", ScoreCoralSlow(self.shooter))
     NamedCommands.registerCommand("Shoot Algae", ShootAlgae(self.shooter))
-    NamedCommands.registerCommand("Release Climber", ReleaseClimber(self.climber).raceWith(WaitCommand(1.5)))
+    NamedCommands.registerCommand("Release Climber", ReleaseClimber(self.climber).withTimeout(1.5))
     NamedCommands.registerCommand("Pathfind Reef AB", self.getPathfindThenFollowPathCommand("Reef AB"))
     NamedCommands.registerCommand("Pathfind Reef CD", self.getPathfindThenFollowPathCommand("Reef CD"))
     NamedCommands.registerCommand("Pathfind Reef EF", self.getPathfindThenFollowPathCommand("Reef EF"))
@@ -94,12 +91,16 @@ class RobotContainer:
       InstantCommand(lambda: self.poseEstimator.setVisionEnabled(False))
     )
     self.driverJoystick.leftBumper().onTrue(
-      self.getPathfindThenFollowPathCommand("Left Coral Station")
-      .alongWith(GotoPreset(self.elevator, self.shooter, MotionPresets.CORAL_STATION))
+      ParallelCommandGroup(
+        self.getPathfindThenFollowPathCommand("Left Coral Station"),
+        GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
+      )
     )
     self.driverJoystick.rightBumper().onTrue(
-      self.getPathfindThenFollowPathCommand("Right Coral Station")
-      .alongWith(GotoPreset(self.elevator, self.shooter, MotionPresets.CORAL_STATION))
+      ParallelCommandGroup(
+        self.getPathfindThenFollowPathCommand("Right Coral Station"),
+        GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
+      )
     )
     self.driverJoystick.povUp().whileTrue(ClimbCage(self.climber))
     self.driverJoystick.povDown().whileTrue(ReleaseClimber(self.climber))
@@ -107,38 +108,33 @@ class RobotContainer:
       InstantCommand(lambda: self.swerve.zeroHeading(self.poseEstimator.getRotation2d())))
 
     self.operatorJoystick.start().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.CORAL_STATION)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
     ).onTrue(InstantCommand(lambda: self.setScoreCoral()))
     self.operatorJoystick.back().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.HOME)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.HOME)
     ).onTrue(InstantCommand(lambda: self.setScoreCoral()))
     self.operatorJoystick.povUp().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.SCORE_L1)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1)
     ).onTrue(InstantCommand(lambda: self.setScoreCoral(True)))
     self.operatorJoystick.povRight().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.SCORE_L2)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L2)
     ).onTrue(InstantCommand(lambda: self.setScoreCoral()))
     self.operatorJoystick.povDown().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.SCORE_L3)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L3)
     ).onTrue(InstantCommand(lambda: self.setScoreCoral()))
-    self.operatorJoystick.povLeft().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.SCORE_L4)
-    ).onTrue(InstantCommand(lambda: self.setScoreCoral(True)))
     self.operatorJoystick.leftBumper().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.REEF_L2)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L2)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
     self.operatorJoystick.rightBumper().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.REEF_L3)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L3)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
     self.operatorJoystick.leftStick().onTrue(InstantCommand(self.stopAll))
     self.operatorJoystick.x().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.PROCCESSOR)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
     self.operatorJoystick.y().onTrue(
-      GotoPreset(self.elevator, self.shooter, MotionPresets.SCORE_L4)
-      .andThen(SetShooterPitch(self.shooter, 45))
-      .andThen(ShootAlgae(self.shooter))
-    ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.NET)))
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.GROUND)
+    ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
     self.operatorJoystick.a().and_(
       lambda: self.operationMode == OperationMode.CORAL and self.isScoreCoralSlow).onTrue(
       ScoreCoralSlow(self.shooter)
@@ -149,7 +145,7 @@ class RobotContainer:
     )
     self.operatorJoystick.b().and_(
       lambda: self.operationMode == OperationMode.CORAL).whileTrue(
-      IntakeCoral(self.shooter)
+      IntakeCoral(self.shooter).until(self.shooter.isCoralFilled)
     )
     self.operatorJoystick.a().and_(lambda: self.operationMode == OperationMode.ALGAE).onTrue(
       ShootAlgae(self.shooter)
@@ -178,26 +174,34 @@ class RobotContainer:
     self.climber.stop()
 
   def getAutonomousCommand(self) -> Command:
-    return None
-    autoCommand = self.autoChooser.getSelected()
-    selstr = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
+    selected = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
+    if selected == "" or not self.poseEstimator.isVisionAvailable():
+      return None
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
-    if selstr == "":
-      return autoCommand
-    for s in selstr:
+    autoCommand = SequentialCommandGroup(
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),
+      self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(selected[0])),
+      ScoreCoralSlow(self.shooter)
+    )
+    for s in selected:
       autoCommand = autoCommand.andThen(
-        ParallelCommandGroup(
-          GotoPreset(
-            self.elevator,
-            self.shooter,
-            MotionPresets.REEF_L2 if int(s) % 2 == 0 else MotionPresets.REEF_L3
-          ),
-          self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(s))
-        ).andThen(IntakeAlgae(self.shooter, True)).andThen(
+        SequentialCommandGroup(
           ParallelCommandGroup(
-            GotoPreset(self.elevator, self.shooter, MotionPresets.PROCCESSOR),
+            GotoPreset(
+              self.elevator,
+              self.shooter,
+              self.pivot,
+              MotionPresets.REEF_L2 if int(s) % 2 == 0 else MotionPresets.REEF_L3
+            ).beforeStarting(WaitCommand(1)),
+            self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(s))
+          ),
+          IntakeAlgae(self.shooter, True),
+          ParallelCommandGroup(
+            GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
+            .beforeStarting(WaitCommand(1)),
             self.getPathfindThenFollowPathCommand("Proccessor")
-          ).andThen(ShootAlgae(self.shooter))
+          ),
+          ShootAlgae(self.shooter)
         )
       )
     return autoCommand
@@ -205,7 +209,7 @@ class RobotContainer:
   def getPathfindThenFollowPathCommand(self, pathName: str):
     path = PathPlannerPath.fromPathFile(pathName)
     constraints = PathConstraints(
-      3.0, 3.0,
+      3, 2,
       degreesToRadians(540), degreesToRadians(360)
     )
     pathfindingCommand = AutoBuilder.pathfindThenFollowPath(

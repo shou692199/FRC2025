@@ -1,6 +1,6 @@
 import math
 from commands2 import Subsystem, Command, InstantCommand
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, DigitalInput
 from rev import SparkMax, SparkMaxConfig, LimitSwitchConfig, ClosedLoopConfig
 from constants import ShooterConstants
 
@@ -22,17 +22,14 @@ class Shooter(Subsystem):
 
     self.configurePitchParam()
     self.configureRollerParam()
-
     self.resetEncoders()
 
-    self.pitchForwardLimit = ShooterConstants.kPitchForwardLimitDeg
-    self.pitchReverseLimit = ShooterConstants.kPitchReverseLimitDeg
     self.desiredPitch = float(0)
+    self.coralSensor = DigitalInput(11)
 
   def configurePitchParam(self):
     cfg_pitch = SparkMaxConfig()
     cfg_pitch.setIdleMode(SparkMaxConfig.IdleMode.kBrake)
-    cfg_pitch.inverted(True)
 
     cfg_pitch.encoder.positionConversionFactor(ShooterConstants.kPitchEncoderRot2Deg)
     cfg_pitch.encoder.velocityConversionFactor(ShooterConstants.kPitchEncoderRot2Deg / 60)
@@ -42,17 +39,7 @@ class Shooter(Subsystem):
     cfg_pitch.absoluteEncoder.positionConversionFactor(360)
     cfg_pitch.absoluteEncoder.velocityConversionFactor(6)
 
-    cfg_pitch.limitSwitch.forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
-    cfg_pitch.limitSwitch.forwardLimitSwitchEnabled(True)
-    cfg_pitch.limitSwitch.reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
-    cfg_pitch.limitSwitch.reverseLimitSwitchEnabled(True)
-
-    cfg_pitch.softLimit.forwardSoftLimit(ShooterConstants.kPitchForwardLimitDeg)
-    cfg_pitch.softLimit.forwardSoftLimitEnabled(True)
-    cfg_pitch.softLimit.reverseSoftLimit(ShooterConstants.kPitchReverseLimitDeg)
-    cfg_pitch.softLimit.reverseSoftLimitEnabled(True)
-
-    cfg_pitch.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder)
+    cfg_pitch.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg_pitch.closedLoop.P(ShooterConstants.kPPitchMotor)
     cfg_pitch.closedLoop.outputRange(
       -ShooterConstants.kPitchMaxOutput, ShooterConstants.kPitchMaxOutput
@@ -70,6 +57,7 @@ class Shooter(Subsystem):
 
     cfg_roller.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg_roller.closedLoop.P(0.05)
+    cfg_roller.closedLoop.D(0.01)
 
     self.rollerMotor.configure(
       cfg_roller,
@@ -78,10 +66,10 @@ class Shooter(Subsystem):
     )
 
   def resetEncoders(self):
-    self.pitchRelativeEncoder.setPosition(self.getPitch())
+    self.pitchRelativeEncoder.setPosition(self.pitchAbsoluteEncoder.getPosition())
 
   def getPitch(self):
-    return self.pitchAbsoluteEncoder.getPosition()
+    return self.pitchRelativeEncoder.getPosition()
   
   def setGoalPitch(self, pitch: float):
     self.desiredPitch = pitch
@@ -94,21 +82,24 @@ class Shooter(Subsystem):
     self.pitchMotor.stopMotor()
 
   def intakeCoralCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(0.7))
+    return InstantCommand(lambda: self.rollerMotor.set(0.3))
 
   def outtakeCoralCommand(self, slowdown = False) -> Command:
     return InstantCommand(
-      lambda: self.rollerMotor.set(-0.3 if slowdown else -0.8)
+      lambda: self.rollerMotor.set(0.4 if slowdown else 0.8)
     )
 
   def intakeAlgaeCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(-0.7))
+    return InstantCommand(lambda: self.rollerMotor.set(-1))
 
   def outtakeAlgaeCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(1))
 
   def holdAlgaeCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(-0.2))
+    return InstantCommand(lambda: self.rollerMotor.set(-1))
+
+  def isCoralFilled(self):
+    return not self.coralSensor.get()
 
   def stopRoller(self):
     self.rollerMotor.stopMotor()
@@ -119,3 +110,7 @@ class Shooter(Subsystem):
 
   def periodic(self):
     SmartDashboard.putNumber("Shooter Pitch", self.getPitch())
+    SmartDashboard.putBoolean("Coral Filled", self.isCoralFilled())
+    if abs(self.getPitch() - self.pitchAbsoluteEncoder.getPosition()) >= 5:
+      self.resetEncoders()
+      print("hello")

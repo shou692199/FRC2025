@@ -15,3 +15,4 @@ class ShootAlgae(SequentialCommandGroup):
 
   def end(self, interrupted):
     self.shooter.stopRoller()
+  

@@ -1,4 +1,4 @@
-from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand
+from commands2 import SequentialCommandGroup, WaitCommand
 from subsystems import Shooter
 
 class IntakeCoral(SequentialCommandGroup):
