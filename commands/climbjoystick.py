@@ -14,7 +14,7 @@ class ClimbJoystick(Command):
     self.climber.setSpeed(0.2)
 
   def execute(self):
-    self.climber.setSpeed(applyDeadband(self.speed(), 0.05))
+    self.climber.setSpeed(self.speed())
 
   def end(self, interrupted):
     self.climber.stop()

@@ -72,7 +72,7 @@ class ElevatorConstants:
   kSmartCurrentLimit = 50
   kForwardLimitMeters = 1.1
   kReverseLimitMeters = 0
-  kMaxOutput = 0.6
+  kMaxOutput = 0.35
   kPMotorPosition = 20
 
 class PivotConstants:
@@ -82,7 +82,7 @@ class PivotConstants:
   kPitchMotorGearRatio = 1 / 20
   kPitchSprocketRatio = 18 / 56
   kPitchEncoderRot2Deg = kPitchMotorGearRatio * kPitchSprocketRatio * 360
-  kPitchAbsoluteEncoderOffset = 105.5
+  kPitchAbsoluteEncoderOffset = 136
 
   kSmartCurrentLimit = 40
   kPitchMaxOutput = 0.3

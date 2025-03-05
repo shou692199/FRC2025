@@ -115,4 +115,5 @@ class Shooter(Subsystem):
   def periodic(self):
     SmartDashboard.putNumber("Shooter Pitch", self.getPitch())
     SmartDashboard.putBoolean("Coral Filled", self.isCoralFilled())
+    SmartDashboard.putBoolean("Coral Sensor Enabled", self.coralSensorEnabled)
     if abs(self.getPitch() - self.pitchAbsEncoder.getPosition()) >= 5: self.resetEncoders()

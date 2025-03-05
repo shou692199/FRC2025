@@ -51,8 +51,7 @@ class Climber(commands2.Subsystem):
     return math.isclose(self.getAngle(), self.desiredAngle, abs_tol=5)
 
   def setSpeed(self, speed: float):
-    if abs(speed) < 0.001:
-      #self.setGoalAngle(self.getAngle())
+    if abs(speed) < 0.05:
       return
     self.motor.set(speed)
 

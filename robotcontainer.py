@@ -4,7 +4,7 @@ from commands import ClimbJoystick, DriveJoystick, GotoPreset, IntakeAlgae, Inta
 from commands import ScoreCoral, ScoreCoralSlow, ShootAlgae
 from commands2 import Command, InstantCommand, WaitCommand, ParallelCommandGroup, SequentialCommandGroup
 from commands2.button import CommandXboxController
-from pathplannerlib.auto import AutoBuilder, NamedCommands
+from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import PIDConstants
 from pathplannerlib.path import PathPlannerPath, PathConstraints
@@ -37,11 +37,7 @@ class RobotContainer:
       self.swerve
     )
 
-    self.registerNamedCommands()
     self.configureButtonBindings()
-
-    self.autoChooser = AutoBuilder.buildAutoChooser()
-    SmartDashboard.putData("Auto Chooser", self.autoChooser)
     SmartDashboard.putString("Reef Algae Selector", "")
 
     self.operationMode = OperationMode.NONE
@@ -63,31 +59,6 @@ class RobotContainer:
       )
     )
 
-  def registerNamedCommands(self):
-    NamedCommands.registerCommand(
-      "Goto Preset SCORE_L1", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1)
-    )
-    NamedCommands.registerCommand(
-      "Goto Preset REEF_L2", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L2)
-    )
-    NamedCommands.registerCommand(
-      "Goto Preset REEF_L3", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L3)
-    )
-    NamedCommands.registerCommand(
-      "Goto Preset PROCCESSOR", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
-    )
-    NamedCommands.registerCommand("Intake Algae", IntakeAlgae(self.shooter))
-    NamedCommands.registerCommand("Intake Coral", IntakeCoral(self.shooter, self.pivot))
-    NamedCommands.registerCommand("Score Coral", ScoreCoral(self.shooter))
-    NamedCommands.registerCommand("Score Coral Slow", ScoreCoralSlow(self.shooter))
-    NamedCommands.registerCommand("Shoot Algae", ShootAlgae(self.shooter))
-    NamedCommands.registerCommand("Pathfind Reef AB", self.getPathfindThenFollowPathCommand("Reef AB"))
-    NamedCommands.registerCommand("Pathfind Reef CD", self.getPathfindThenFollowPathCommand("Reef CD"))
-    NamedCommands.registerCommand("Pathfind Reef EF", self.getPathfindThenFollowPathCommand("Reef EF"))
-    NamedCommands.registerCommand("Pathfind Reef GH", self.getPathfindThenFollowPathCommand("Reef GH"))
-    NamedCommands.registerCommand("Pathfind Reef IJ", self.getPathfindThenFollowPathCommand("Reef IJ"))
-    NamedCommands.registerCommand("Pathfind Reef KL", self.getPathfindThenFollowPathCommand("Reef KL"))
-
   def configureButtonBindings(self):
     self.driverJoystick.start().onTrue(
       InstantCommand(lambda: self.poseEstimator.setVisionEnabled(True))
@@ -107,7 +78,43 @@ class RobotContainer:
         GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
       )
     )
-    self.driverJoystick.x().onTrue(
+    self.driverJoystick.x().and_(self.driverJoystick.povDown()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef A")
+    )
+    self.driverJoystick.b().and_(self.driverJoystick.povDown()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef B")
+    )
+    self.driverJoystick.x().and_(self.driverJoystick.povDownRight()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef C")
+    )
+    self.driverJoystick.b().and_(self.driverJoystick.povDownRight()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef D")
+    )
+    self.driverJoystick.x().and_(self.driverJoystick.povUpRight()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef E")
+    )
+    self.driverJoystick.b().and_(self.driverJoystick.povUpRight()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef F")
+    )
+    self.driverJoystick.x().and_(self.driverJoystick.povUp()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef G")
+    )
+    self.driverJoystick.b().and_(self.driverJoystick.povUp()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef H")
+    )
+    self.driverJoystick.x().and_(self.driverJoystick.povUpLeft()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef I")
+    )
+    self.driverJoystick.b().and_(self.driverJoystick.povUpLeft()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef J")
+    )
+    self.driverJoystick.x().and_(self.driverJoystick.povDownLeft()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef K")
+    )
+    self.driverJoystick.b().and_(self.driverJoystick.povDownLeft()).onTrue(
+      self.getPathfindThenFollowPathCommand("Reef L")
+    )
+    self.driverJoystick.y().onTrue(
       InstantCommand(lambda: self.swerve.zeroHeading(self.poseEstimator.getRotation2d())))
 
     self.operatorJoystick.start().onTrue(
@@ -219,8 +226,4 @@ class RobotContainer:
       3, 2,
       degreesToRadians(540), degreesToRadians(360)
     )
-    pathfindingCommand = AutoBuilder.pathfindThenFollowPath(
-      path,
-      constraints
-    )
-    return pathfindingCommand
+    return AutoBuilder.pathfindThenFollowPath(path, constraints)
