@@ -1,6 +1,6 @@
 from wpilib import SmartDashboard, DriverStation
 from wpimath.units import degreesToRadians
-from commands import ClimbCage, DriveJoystick, GotoPreset, IntakeAlgae, IntakeCoral, ReleaseClimber
+from commands import ClimbJoystick, DriveJoystick, GotoPreset, IntakeAlgae, IntakeCoral
 from commands import ScoreCoral, ScoreCoralSlow, ShootAlgae
 from commands2 import Command, InstantCommand, WaitCommand, ParallelCommandGroup, SequentialCommandGroup
 from commands2.button import CommandXboxController
@@ -57,6 +57,13 @@ class RobotContainer:
       )
     )
 
+    self.climber.setDefaultCommand(
+      ClimbJoystick(
+        self.climber,
+        lambda: self.driverJoystick.getRightTriggerAxis() - self.driverJoystick.getLeftTriggerAxis()
+      )
+    )
+
   def registerNamedCommands(self):
     NamedCommands.registerCommand(
       "Goto Preset SCORE_L1", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1)
@@ -71,11 +78,10 @@ class RobotContainer:
       "Goto Preset PROCCESSOR", GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
     )
     NamedCommands.registerCommand("Intake Algae", IntakeAlgae(self.shooter))
-    NamedCommands.registerCommand("Intake Coral", IntakeCoral(self.shooter))
+    NamedCommands.registerCommand("Intake Coral", IntakeCoral(self.shooter, self.pivot))
     NamedCommands.registerCommand("Score Coral", ScoreCoral(self.shooter))
     NamedCommands.registerCommand("Score Coral Slow", ScoreCoralSlow(self.shooter))
     NamedCommands.registerCommand("Shoot Algae", ShootAlgae(self.shooter))
-    NamedCommands.registerCommand("Release Climber", ReleaseClimber(self.climber).withTimeout(1.5))
     NamedCommands.registerCommand("Pathfind Reef AB", self.getPathfindThenFollowPathCommand("Reef AB"))
     NamedCommands.registerCommand("Pathfind Reef CD", self.getPathfindThenFollowPathCommand("Reef CD"))
     NamedCommands.registerCommand("Pathfind Reef EF", self.getPathfindThenFollowPathCommand("Reef EF"))
@@ -102,8 +108,6 @@ class RobotContainer:
         GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
       )
     )
-    self.driverJoystick.povUp().whileTrue(ClimbCage(self.climber))
-    self.driverJoystick.povDown().whileTrue(ReleaseClimber(self.climber))
     self.driverJoystick.x().onTrue(
       InstantCommand(lambda: self.swerve.zeroHeading(self.poseEstimator.getRotation2d())))
 
@@ -128,6 +132,12 @@ class RobotContainer:
     self.operatorJoystick.rightBumper().onTrue(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.REEF_L3)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
+    self.operatorJoystick.leftTrigger().onTrue(
+      InstantCommand(lambda: self.shooter.setCoralSensorEnabled(False))
+    )
+    self.operatorJoystick.rightTrigger().onTrue(
+      InstantCommand(lambda: self.shooter.setCoralSensorEnabled(True))
+    )
     self.operatorJoystick.leftStick().onTrue(InstantCommand(self.stopAll))
     self.operatorJoystick.x().onTrue(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
@@ -145,7 +155,7 @@ class RobotContainer:
     )
     self.operatorJoystick.b().and_(
       lambda: self.operationMode == OperationMode.CORAL).whileTrue(
-      IntakeCoral(self.shooter).until(self.shooter.isCoralFilled)
+      IntakeCoral(self.shooter, self.pivot).until(self.shooter.isCoralFilled)
     )
     self.operatorJoystick.a().and_(lambda: self.operationMode == OperationMode.ALGAE).onTrue(
       ShootAlgae(self.shooter)
@@ -156,9 +166,7 @@ class RobotContainer:
 
   def shouldFlipPath(self):
     alliance = DriverStation.getAlliance()
-    if alliance is None:
-      return False
-    return alliance == DriverStation.Alliance.kRed
+    return False if alliance is None else alliance == DriverStation.Alliance.kRed
 
   def setOperationMode(self, mode: OperationMode):
     self.operationMode = mode
@@ -171,12 +179,12 @@ class RobotContainer:
     self.swerve.stop()
     self.elevator.stop()
     self.shooter.stop()
+    self.pivot.stop()
     self.climber.stop()
 
   def getAutonomousCommand(self) -> Command:
     selected = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
-    if selected == "" or not self.poseEstimator.isVisionAvailable():
-      return None
+    if selected == "" or not self.poseEstimator.isVisionAvailable(): return None
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
     autoCommand = SequentialCommandGroup(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),

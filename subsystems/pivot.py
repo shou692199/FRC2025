@@ -1,6 +1,7 @@
 import math
-from commands2 import Subsystem
+from commands2 import Subsystem, Command, InstantCommand
 from wpilib import SmartDashboard, DutyCycleEncoder
+from phoenix6.hardware import TalonFX
 from rev import SparkMax, SparkMaxConfig, ClosedLoopConfig
 from constants import PivotConstants
 
@@ -9,13 +10,13 @@ class Pivot(Subsystem):
     self.pitchMotor = SparkMax(
       PivotConstants.kPitchMotorId, SparkMax.MotorType.kBrushless
     )
+    self.rollerMotor = TalonFX(PivotConstants.kRollerMotorId)
 
-    self.pitchRelativeEncoder = self.pitchMotor.getEncoder()
-    self.pitchAbsoluteEncoder = DutyCycleEncoder(10, 360, PivotConstants.kPitchAbsoluteEncoderOffset)
+    self.pitchRelEncoder = self.pitchMotor.getEncoder()
+    self.pitchAbsEncoder = DutyCycleEncoder(10, 360, PivotConstants.kPitchAbsoluteEncoderOffset)
     self.pitchClosedLoopController = self.pitchMotor.getClosedLoopController()
 
     self.configurePitchParam()
-    self.configureRollerParam()
     self.resetEncoders()
 
     self.desiredPitch = float(0)
@@ -39,14 +40,11 @@ class Pivot(Subsystem):
       SparkMax.PersistMode.kPersistParameters
     )
 
-  def configureRollerParam(self):
-    pass
-
   def resetEncoders(self):
-    self.pitchRelativeEncoder.setPosition(self.pitchAbsoluteEncoder.get())
+    self.pitchRelEncoder.setPosition(self.pitchAbsEncoder.get())
 
   def getPitch(self):
-    return self.pitchRelativeEncoder.getPosition()
+    return self.pitchRelEncoder.getPosition()
   
   def setGoalPitch(self, pitch: float):
     self.desiredPitch = pitch
@@ -58,8 +56,11 @@ class Pivot(Subsystem):
   def stopPitch(self):
     self.pitchMotor.stopMotor()
 
+  def intakeCoralCommand(self) -> Command:
+    return InstantCommand(lambda: self.rollerMotor.set(0.5))
+
   def stopRoller(self):
-    pass
+    self.rollerMotor.stopMotor()
 
   def stop(self):
     self.stopPitch()
@@ -67,7 +68,5 @@ class Pivot(Subsystem):
 
   def periodic(self):
     SmartDashboard.putNumber("Pivot Pitch", self.getPitch())
-    SmartDashboard.putNumber("Pivot Pitch Abs", self.pitchAbsoluteEncoder.get())
-    if abs(self.getPitch() - self.pitchAbsoluteEncoder.get()) >= 5:
-      self.resetEncoders()
-      print("hello")
+    SmartDashboard.putNumber("Pivot Pitch Abs", self.pitchAbsEncoder.get())
+    if abs(self.getPitch() - self.pitchAbsEncoder.get()) >= 5: self.resetEncoders()

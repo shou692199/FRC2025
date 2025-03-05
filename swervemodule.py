@@ -94,7 +94,6 @@ class SwerveModule:
     if state.speed <= DriveConstants.kDeadband:
       self.stop()
       return
-    
     state.optimize(self.getModuleAngle())
     self.driveMotor.set_control(self.driveVelocityVoltage.with_velocity(state.speed))
     self.steerMotor.set_control(

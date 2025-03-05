@@ -1,6 +1,7 @@
 import math
 from commands2 import Subsystem, Command, InstantCommand
 from wpilib import SmartDashboard, DigitalInput
+from wpimath.filter import Debouncer
 from rev import SparkMax, SparkMaxConfig, LimitSwitchConfig, ClosedLoopConfig
 from constants import ShooterConstants
 
@@ -13,8 +14,8 @@ class Shooter(Subsystem):
       ShooterConstants.kRollerMotorId, SparkMax.MotorType.kBrushless
     )
 
-    self.pitchRelativeEncoder = self.pitchMotor.getEncoder()
-    self.pitchAbsoluteEncoder = self.pitchMotor.getAbsoluteEncoder()
+    self.pitchRelEncoder = self.pitchMotor.getEncoder()
+    self.pitchAbsEncoder = self.pitchMotor.getAbsoluteEncoder()
     self.pitchClosedLoopController = self.pitchMotor.getClosedLoopController()
 
     self.rollerEncoder = self.rollerMotor.getEncoder()
@@ -26,6 +27,8 @@ class Shooter(Subsystem):
 
     self.desiredPitch = float(0)
     self.coralSensor = DigitalInput(11)
+    self.coralSensorEnabled = True
+    self.debouncer = Debouncer(0.1, Debouncer.DebounceType.kBoth)
 
   def configurePitchParam(self):
     cfg_pitch = SparkMaxConfig()
@@ -66,10 +69,10 @@ class Shooter(Subsystem):
     )
 
   def resetEncoders(self):
-    self.pitchRelativeEncoder.setPosition(self.pitchAbsoluteEncoder.getPosition())
+    self.pitchRelEncoder.setPosition(self.pitchAbsEncoder.getPosition())
 
   def getPitch(self):
-    return self.pitchRelativeEncoder.getPosition()
+    return self.pitchRelEncoder.getPosition()
   
   def setGoalPitch(self, pitch: float):
     self.desiredPitch = pitch
@@ -85,9 +88,7 @@ class Shooter(Subsystem):
     return InstantCommand(lambda: self.rollerMotor.set(0.3))
 
   def outtakeCoralCommand(self, slowdown = False) -> Command:
-    return InstantCommand(
-      lambda: self.rollerMotor.set(0.4 if slowdown else 0.8)
-    )
+    return InstantCommand(lambda: self.rollerMotor.set(0.5 if slowdown else 0.8))
 
   def intakeAlgaeCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(-1))
@@ -99,7 +100,10 @@ class Shooter(Subsystem):
     return InstantCommand(lambda: self.rollerMotor.set(-1))
 
   def isCoralFilled(self):
-    return not self.coralSensor.get()
+    return self.debouncer.calculate(not self.coralSensor.get()) and self.coralSensorEnabled
+
+  def setCoralSensorEnabled(self, enabled: bool):
+    self.coralSensorEnabled = enabled
 
   def stopRoller(self):
     self.rollerMotor.stopMotor()
@@ -111,6 +115,4 @@ class Shooter(Subsystem):
   def periodic(self):
     SmartDashboard.putNumber("Shooter Pitch", self.getPitch())
     SmartDashboard.putBoolean("Coral Filled", self.isCoralFilled())
-    if abs(self.getPitch() - self.pitchAbsoluteEncoder.getPosition()) >= 5:
-      self.resetEncoders()
-      print("hello")
+    if abs(self.getPitch() - self.pitchAbsEncoder.getPosition()) >= 5: self.resetEncoders()

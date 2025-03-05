@@ -16,7 +16,7 @@ class ModuleConstants:
   kDriveMotorMaxRPM = 6380
   kDriveMotorNominalVoltage = 12
   kPDriveMotor = 0.95
-  kSDriveMotor = 0.04
+  kSDriveMotor = 0.06
   kVDriveMotor = kDriveMotorNominalVoltage * 60 / kDriveEncoderRot2Meter / kDriveMotorMaxRPM
   kPSteerMotor = 0.7
 
@@ -31,7 +31,7 @@ class DriveConstants:
   )
 
   kDeadband = 0.001
-  kPHeading = 1.2
+  kPHeading = 1.4
 
   kPhysicalMaxSpeedMetersPerSecond = 5
   kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * math.tau

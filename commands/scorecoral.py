@@ -8,7 +8,7 @@ class ScoreCoral(SequentialCommandGroup):
     self.shooter = shooter
     self.addCommands(
       shooter.outtakeCoralCommand(),
-      WaitCommand(1.5)
+      WaitCommand(1)
     )
 
     self.addRequirements(shooter)
