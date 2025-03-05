@@ -31,3 +31,6 @@ robotpy_extras = [
 requires = [
     "photonlibpy"
 ]
+
+[tool.robotpy.pyfrc]
+isolated = true
