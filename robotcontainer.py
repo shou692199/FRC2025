@@ -23,20 +23,19 @@ class RobotContainer:
     self.driverJoystick = CommandXboxController(OIConstants.kDriverControllerPort)
     self.operatorJoystick = CommandXboxController(OIConstants.kOperatorControllerPort)
 
-    if not AutoBuilder.isConfigured():
-      AutoBuilder.configure(
-        self.poseEstimator.getPose,
-        self.poseEstimator.resetPose,
-        self.swerve.getChassisSpeeds,
-        lambda speed, _: self.swerve.driveRobotRelative(speed),
-        PPHolonomicDriveController(
-          PIDConstants(AutoConstants.kPTranslation),
-          PIDConstants(AutoConstants.kPRotation)
-        ),
-        AutoConstants.kRobotConfig,
-        self.shouldFlipPath,
-        self.swerve
-      )
+    AutoBuilder.configure(
+      self.poseEstimator.getPose,
+      self.poseEstimator.resetPose,
+      self.swerve.getChassisSpeeds,
+      lambda speed, _: self.swerve.driveRobotRelative(speed),
+      PPHolonomicDriveController(
+        PIDConstants(AutoConstants.kPTranslation),
+        PIDConstants(AutoConstants.kPRotation)
+      ),
+      AutoConstants.kRobotConfig,
+      self.shouldFlipPath,
+      self.swerve
+    )
 
     self.registerNamedCommands()
     self.configureButtonBindings()
