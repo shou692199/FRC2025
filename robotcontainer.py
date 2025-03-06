@@ -66,18 +66,6 @@ class RobotContainer:
     self.driverJoystick.back().onTrue(
       InstantCommand(lambda: self.poseEstimator.setVisionEnabled(False))
     )
-    self.driverJoystick.leftBumper().onTrue(
-      ParallelCommandGroup(
-        self.getPathfindThenFollowPathCommand("Left Coral Station"),
-        GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
-      )
-    )
-    self.driverJoystick.rightBumper().onTrue(
-      ParallelCommandGroup(
-        self.getPathfindThenFollowPathCommand("Right Coral Station"),
-        GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
-      )
-    )
     self.driverJoystick.x().and_(self.driverJoystick.povDown()).onTrue(
       self.getPathfindThenFollowPathCommand("Reef A")
     )
@@ -114,8 +102,18 @@ class RobotContainer:
     self.driverJoystick.b().and_(self.driverJoystick.povDownLeft()).onTrue(
       self.getPathfindThenFollowPathCommand("Reef L")
     )
-    self.driverJoystick.y().onTrue(
-      InstantCommand(lambda: self.swerve.zeroHeading(self.poseEstimator.getRotation2d())))
+    self.driverJoystick.y().and_(self.driverJoystick.leftBumper()).onTrue(
+      ParallelCommandGroup(
+        self.getPathfindThenFollowPathCommand("Left Coral Station"),
+        GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
+      )
+    )
+    self.driverJoystick.y().and_(self.driverJoystick.rightBumper()).onTrue(
+      ParallelCommandGroup(
+        self.getPathfindThenFollowPathCommand("Right Coral Station"),
+        GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
+      )
+    )
 
     self.operatorJoystick.start().onTrue(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
