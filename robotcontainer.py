@@ -114,6 +114,7 @@ class RobotContainer:
         GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
       )
     )
+    self.driverJoystick.a().onTrue(InstantCommand(self.swerve.stop, self.swerve))
 
     self.operatorJoystick.start().onTrue(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
@@ -223,7 +224,7 @@ class RobotContainer:
   def getPathfindThenFollowPathCommand(self, pathName: str):
     path = PathPlannerPath.fromPathFile(pathName)
     constraints = PathConstraints(
-      3, 2,
+      1.5, 2,
       degreesToRadians(540), degreesToRadians(360)
     )
     return AutoBuilder.pathfindThenFollowPath(path, constraints)

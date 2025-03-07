@@ -2,7 +2,7 @@ import math
 from commands2 import Subsystem, Command, InstantCommand
 from wpilib import SmartDashboard, DigitalInput
 from wpimath.filter import Debouncer
-from rev import SparkMax, SparkMaxConfig, LimitSwitchConfig, ClosedLoopConfig
+from rev import SparkMax, SparkMaxConfig, ClosedLoopConfig
 from constants import ShooterConstants
 
 class Shooter(Subsystem):

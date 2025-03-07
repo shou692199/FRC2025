@@ -69,7 +69,7 @@ class PoseEstimator(commands2.Subsystem):
       singleTarget = estimatedPose.targetsUsed[0]
       cameraToTarget = singleTarget.getBestCameraToTarget()
       distance = (cameraToTarget.x**2 + cameraToTarget.y**2)**0.5
-      if singleTarget.getPoseAmbiguity() <= 0.25 and distance <= 3.5:
+      if singleTarget.getPoseAmbiguity() <= 0.3 and distance <= 4:
         self.poseEstimator.addVisionMeasurement(
           estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds)
         self.visionTimestamp = Timer.getTimestamp()

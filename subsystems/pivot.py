@@ -30,6 +30,7 @@ class Pivot(Subsystem):
 
     cfg_pitch.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg_pitch.closedLoop.P(PivotConstants.kPPitchMotor)
+    cfg_pitch.closedLoop.D(0.01)
     cfg_pitch.closedLoop.outputRange(
       -PivotConstants.kPitchMaxOutput, PivotConstants.kPitchMaxOutput
     )

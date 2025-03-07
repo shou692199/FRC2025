@@ -9,7 +9,8 @@ class IntakeCoral(SequentialCommandGroup):
     self.pivot = pivot
     self.addCommands(
       shooter.intakeCoralCommand(),
-      pivot.intakeCoralCommand()
+      pivot.intakeCoralCommand(),
+      WaitCommand(5)
     )
 
     self.addRequirements(shooter, pivot)

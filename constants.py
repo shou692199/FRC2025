@@ -69,7 +69,7 @@ class ElevatorConstants:
   kMotorGearRatio = 1 / 20
   kEncoderRot2Meter = kMotorGearRatio * kSprocketTeeth * kChainPitchMeters * 2
 
-  kSmartCurrentLimit = 50
+  kSmartCurrentLimit = 30
   kForwardLimitMeters = 1.1
   kReverseLimitMeters = 0
   kMaxOutput = 0.35
@@ -86,7 +86,7 @@ class PivotConstants:
 
   kSmartCurrentLimit = 60
   kPitchMaxOutput = 0.3
-  kPPitchMotor = 0.01
+  kPPitchMotor = 0.005
 
 class ShooterConstants:
   kPitchMotorId = 16
@@ -97,7 +97,7 @@ class ShooterConstants:
   kPitchEncoderRot2Deg = kPitchMotorGearRatio * kPitchSprocketRatio * 360
   kPitchAbsoluteEncoderOffset = 0.9
 
-  kSmartCurrentLimit = 30
+  kSmartCurrentLimit = 60
   kPitchMaxOutput = 0.7
   kPPitchMotor = 0.02
 
@@ -108,7 +108,7 @@ class ClimberConstants:
   kAbsoluteEncoderOffset = 0.69
 
 class MotionPresets(Enum):
-  CORAL_STATION = (0, 180, 76)
+  CORAL_STATION = (0, 182.65, 64)
   PROCCESSOR = (0.1, 165, 0)
   SCORE_L1 = (0.25, 165, 60)
   SCORE_L2 = (0.52, 165, 50)
