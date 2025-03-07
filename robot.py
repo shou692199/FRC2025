@@ -1,4 +1,5 @@
 from wpilib import Timer, XboxController
+from wpinet import PortForwarder
 from commands2 import TimedCommandRobot, SequentialCommandGroup, InstantCommand, WaitCommand
 from commands2.button import Trigger
 from robotcontainer import RobotContainer
@@ -23,6 +24,9 @@ class MyRobot(TimedCommandRobot):
         )
       )
     )
+
+    self.portForwarder = PortForwarder()
+    self.portForwarder.add(5800, "photonvision.local", 5800)
 
   def autonomousInit(self):
     self.autonomousCommand = self.container.getAutonomousCommand()

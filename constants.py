@@ -117,6 +117,7 @@ class MotionPresets(Enum):
   REEF_L3 = (0.90, 165, 0)
   HOME = (0, 165, 0)
   GROUND = (0, 120, 65)
+  PIVOT_L1 = (0, 145, 65)
 
 class OperationMode(Enum):
   NONE = 0

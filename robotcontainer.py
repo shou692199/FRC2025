@@ -144,6 +144,9 @@ class RobotContainer:
       InstantCommand(lambda: self.shooter.setCoralSensorEnabled(True))
     )
     self.operatorJoystick.leftStick().onTrue(InstantCommand(self.stopAll))
+    self.operatorJoystick.rightStick().onTrue(
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PIVOT_L1)
+    ).onTrue(InstantCommand(lambda: self.setScoreCoral()))
     self.operatorJoystick.x().onTrue(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
@@ -163,10 +166,10 @@ class RobotContainer:
       IntakeCoral(self.shooter, self.pivot).until(self.shooter.isCoralFilled)
     )
     self.operatorJoystick.a().and_(lambda: self.operationMode == OperationMode.ALGAE).onTrue(
-      ShootAlgae(self.shooter)
+      ShootAlgae(self.shooter, self.pivot)
     )
     self.operatorJoystick.b().and_(lambda: self.operationMode == OperationMode.ALGAE).onTrue(
-      IntakeAlgae(self.shooter)
+      IntakeAlgae(self.shooter, self.pivot)
     )
 
   def shouldFlipPath(self):
@@ -189,7 +192,7 @@ class RobotContainer:
 
   def getAutonomousCommand(self) -> Command:
     selected = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
-    if selected == "" or not self.poseEstimator.isVisionAvailable(): return None
+    if selected == "": return None #or not self.poseEstimator.isVisionAvailable(): return None
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
     autoCommand = SequentialCommandGroup(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),
@@ -210,13 +213,13 @@ class RobotContainer:
             ).beforeStarting(WaitCommand(1)),
             self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(s))
           ),
-          IntakeAlgae(self.shooter, True),
+          IntakeAlgae(self.shooter, self.pivot, True),
           ParallelCommandGroup(
             GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
             .beforeStarting(WaitCommand(1)),
             self.getPathfindThenFollowPathCommand("Dump " + ("Far" if 3 <= int(s) <= 5 else "Near"))
           ),
-          ShootAlgae(self.shooter)
+          ShootAlgae(self.shooter, self.pivot)
         )
       )
     return autoCommand
@@ -224,7 +227,7 @@ class RobotContainer:
   def getPathfindThenFollowPathCommand(self, pathName: str):
     path = PathPlannerPath.fromPathFile(pathName)
     constraints = PathConstraints(
-      1.5, 2,
+      3, 2,
       degreesToRadians(540), degreesToRadians(360)
     )
     return AutoBuilder.pathfindThenFollowPath(path, constraints)

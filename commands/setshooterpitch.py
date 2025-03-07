@@ -13,5 +13,3 @@ class SetShooterPitch(Command):
 
   def isFinished(self):
     return self.shooter.atGoalPitch()
-
-  
