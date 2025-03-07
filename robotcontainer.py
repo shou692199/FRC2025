@@ -151,11 +151,11 @@ class RobotContainer:
     ).onTrue(InstantCommand(lambda: self.setOperationMode(OperationMode.ALGAE)))
     self.operatorJoystick.a().and_(
       lambda: self.operationMode == OperationMode.CORAL and self.isScoreCoralSlow).onTrue(
-      ScoreCoralSlow(self.shooter)
+      ScoreCoralSlow(self.shooter, self.pivot)
     )
     self.operatorJoystick.a().and_(
       lambda: self.operationMode == OperationMode.CORAL and not self.isScoreCoralSlow).onTrue(
-      ScoreCoral(self.shooter)
+      ScoreCoral(self.shooter, self.pivot)
     )
     self.operatorJoystick.b().and_(
       lambda: self.operationMode == OperationMode.CORAL).whileTrue(
@@ -188,14 +188,16 @@ class RobotContainer:
 
   def getAutonomousCommand(self) -> Command:
     selected = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
-    if selected == "" or not self.poseEstimator.isVisionAvailable(): return None
+    if selected == "" : return None#or not self.poseEstimator.isVisionAvailable(): return None
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
     autoCommand = SequentialCommandGroup(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),
       self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(selected[0])),
-      ScoreCoralSlow(self.shooter)
+      ScoreCoralSlow(self.shooter, self.pivot)
     )
-    for s in selected:
+    if len(selected) == 1:
+      return autoCommand
+    for s in selected[1:]:
       autoCommand = autoCommand.andThen(
         SequentialCommandGroup(
           ParallelCommandGroup(

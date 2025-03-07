@@ -58,6 +58,9 @@ class Pivot(Subsystem):
 
   def intakeCoralCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(0.5))
+  
+  def outtakeCoralCommand(self) -> Command:
+    return InstantCommand(lambda: self.rollerMotor.set(-0.5))
 
   def stopRoller(self):
     self.rollerMotor.stopMotor()

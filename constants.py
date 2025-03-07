@@ -84,7 +84,7 @@ class PivotConstants:
   kPitchEncoderRot2Deg = kPitchMotorGearRatio * kPitchSprocketRatio * 360
   kPitchAbsoluteEncoderOffset = 136
 
-  kSmartCurrentLimit = 40
+  kSmartCurrentLimit = 60
   kPitchMaxOutput = 0.3
   kPPitchMotor = 0.01
 
@@ -95,7 +95,7 @@ class ShooterConstants:
   kPitchMotorGearRatio = 1 / 20
   kPitchSprocketRatio = 14 / 50
   kPitchEncoderRot2Deg = kPitchMotorGearRatio * kPitchSprocketRatio * 360
-  kPitchAbsoluteEncoderOffset = 0.5365
+  kPitchAbsoluteEncoderOffset = 0.9
 
   kSmartCurrentLimit = 30
   kPitchMaxOutput = 0.7
@@ -171,7 +171,7 @@ class VisionConstants:
   kVisionMesurementStdDevs = (0.5, 0.5, degreesToRadians(30))
 
 class PhysicsConstants:
-  kDriveMotorMOI = 0.0001
+  kDriveMotorMOI = 0.0007
   kSteerMotorMOI = 0.0001
   kGyroSimDevice = "navX-Sensor[4]"
   kElevatorMassKilograms = 4

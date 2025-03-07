@@ -9,12 +9,9 @@ class ClimbJoystick(Command):
     self.speed = speed
 
     self.addRequirements(self.climber)
-    
-  def initialize(self):
-    self.climber.setSpeed(0.2)
 
   def execute(self):
-    self.climber.setSpeed(self.speed())
+    self.climber.setSpeed(self.speed() * 0.5)
 
   def end(self, interrupted):
     self.climber.stop()
