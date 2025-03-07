@@ -28,7 +28,7 @@ class Shooter(Subsystem):
     self.desiredPitch = float(0)
     self.coralSensor = DigitalInput(11)
     self.coralSensorEnabled = True
-    self.debouncer = Debouncer(0.1, Debouncer.DebounceType.kBoth)
+    self.debouncer = Debouncer(0.02, Debouncer.DebounceType.kBoth)
 
   def configurePitchParam(self):
     cfg_pitch = SparkMaxConfig()
@@ -58,10 +58,6 @@ class Shooter(Subsystem):
     cfg_roller = SparkMaxConfig()
     cfg_roller.smartCurrentLimit(ShooterConstants.kSmartCurrentLimit)
 
-    cfg_roller.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
-    cfg_roller.closedLoop.P(0.05)
-    cfg_roller.closedLoop.D(0.01)
-
     self.rollerMotor.configure(
       cfg_roller,
       SparkMax.ResetMode.kResetSafeParameters,
@@ -85,7 +81,7 @@ class Shooter(Subsystem):
     self.pitchMotor.stopMotor()
 
   def intakeCoralCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(0.3))
+    return InstantCommand(lambda: self.rollerMotor.set(0.6))
 
   def outtakeCoralCommand(self, slowdown = False) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(0.5 if slowdown else 0.8))

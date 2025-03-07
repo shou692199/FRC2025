@@ -99,7 +99,7 @@ class ShooterConstants:
 
   kSmartCurrentLimit = 60
   kPitchMaxOutput = 0.7
-  kPPitchMotor = 0.02
+  kPPitchMotor = 0.012
 
 class ClimberConstants:
   kMotorId = 18
@@ -108,15 +108,15 @@ class ClimberConstants:
   kAbsoluteEncoderOffset = 0.69
 
 class MotionPresets(Enum):
-  CORAL_STATION = (0, 182.65, 64)
+  CORAL_STATION = (0, 182.65, 70)
   PROCCESSOR = (0.1, 165, 0)
   SCORE_L1 = (0.25, 165, 60)
   SCORE_L2 = (0.52, 165, 50)
-  SCORE_L3 = (0.88, 165, 47)
+  SCORE_L3 = (0.88, 165, 54)
   REEF_L2 = (0.55, 165, 0)
   REEF_L3 = (0.90, 165, 0)
   HOME = (0, 165, 0)
-  GROUND = (0, 90, 65)
+  GROUND = (0, 120, 65)
 
 class OperationMode(Enum):
   NONE = 0
@@ -125,7 +125,7 @@ class OperationMode(Enum):
 
 class AutoConstants:
   kRobotConfig = RobotConfig.fromGUISettings()
-  kPTranslation = 0.5
+  kPTranslation = 0.8
   kPRotation = 3.2
 
 class ChaseTagConstants:
@@ -165,7 +165,7 @@ class VisionConstants:
   )
   kLowCameraPhoton = PhotonCamera("Low Camera")
   kLowCameraTransform = Transform3d(
-    0.22, -0.31, 0.325, Rotation3d()
+    0.22-0.23, -0.31+0.045, 0.325, Rotation3d()
   )
   kStateStdDevs = (0.05, 0.05, degreesToRadians(5))
   kVisionMesurementStdDevs = (0.5, 0.5, degreesToRadians(30))

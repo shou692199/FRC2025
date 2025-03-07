@@ -189,7 +189,7 @@ class RobotContainer:
 
   def getAutonomousCommand(self) -> Command:
     selected = str(SmartDashboard.getString("Reef Algae Selector", "")).strip()
-    if selected == "" : return None#or not self.poseEstimator.isVisionAvailable(): return None
+    if selected == "" or not self.poseEstimator.isVisionAvailable(): return None
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
     autoCommand = SequentialCommandGroup(
       GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),
@@ -214,7 +214,7 @@ class RobotContainer:
           ParallelCommandGroup(
             GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
             .beforeStarting(WaitCommand(1)),
-            self.getPathfindThenFollowPathCommand("Proccessor")
+            self.getPathfindThenFollowPathCommand("Dump " + ("Far" if 3 <= int(s) <= 5 else "Near"))
           ),
           ShootAlgae(self.shooter)
         )

@@ -51,11 +51,13 @@ class Climber(commands2.Subsystem):
     return math.isclose(self.getAngle(), self.desiredAngle, abs_tol=5)
 
   def setSpeed(self, speed: float):
-    if abs(speed) < 0.05:
+    if abs(speed) < 0.2:
+      self.stop()
       return
     self.motor.set(speed)
 
   def stop(self):
+    print("hello")
     self.motor.stopMotor()
 
   def periodic(self):
