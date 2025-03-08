@@ -86,7 +86,7 @@ class PivotConstants:
 
   kSmartCurrentLimit = 60
   kPitchMaxOutput = 0.3
-  kPPitchMotor = 0.005
+  kPPitchMotor = 0.007
 
 class ShooterConstants:
   kPitchMotorId = 16
@@ -108,7 +108,7 @@ class ClimberConstants:
   kAbsoluteEncoderOffset = 0.69
 
 class MotionPresets(Enum):
-  CORAL_STATION = (0, 182.65, 70)
+  CORAL_STATION = (0, 178, 72)
   PROCCESSOR = (0.1, 165, 0)
   SCORE_L1 = (0.25, 165, 60)
   SCORE_L2 = (0.52, 165, 50)
@@ -116,8 +116,8 @@ class MotionPresets(Enum):
   REEF_L2 = (0.55, 165, 0)
   REEF_L3 = (0.90, 165, 0)
   HOME = (0, 165, 0)
-  GROUND = (0, 120, 65)
-  PIVOT_L1 = (0, 145, 65)
+  GROUND = (0, 110, 65)
+  PIVOT_L1 = (0, 135, 0)
 
 class OperationMode(Enum):
   NONE = 0
@@ -126,8 +126,8 @@ class OperationMode(Enum):
 
 class AutoConstants:
   kRobotConfig = RobotConfig.fromGUISettings()
-  kPTranslation = 0.8
-  kPRotation = 3.2
+  kPTranslation = 1.7
+  kPRotation = 3.5
 
 class ChaseTagConstants:
   kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 2

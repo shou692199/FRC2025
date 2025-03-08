@@ -13,7 +13,7 @@ class MyRobot(TimedCommandRobot):
     self.driverJoystick = self.container.driverJoystick
 
     self.timer = Timer()
-    Trigger(lambda: self.timer.hasElapsed(105)).onTrue(
+    Trigger(lambda: self.timer.hasElapsed(110/7)).onTrue(
       SequentialCommandGroup(
         InstantCommand(
           lambda: self.driverJoystick.setRumble(XboxController.RumbleType.kBothRumble, 1)
@@ -24,9 +24,8 @@ class MyRobot(TimedCommandRobot):
         )
       )
     )
-
-    self.portForwarder = PortForwarder()
-    self.portForwarder.add(5800, "photonvision.local", 5800)
+    
+    PortForwarder.getInstance().add(5800, "photonvision.local", 5800)
 
   def autonomousInit(self):
     self.autonomousCommand = self.container.getAutonomousCommand()

@@ -44,6 +44,7 @@ class Shooter(Subsystem):
 
     cfg_pitch.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg_pitch.closedLoop.P(ShooterConstants.kPPitchMotor)
+    cfg_pitch.closedLoop.D(0.05)
     cfg_pitch.closedLoop.outputRange(
       -ShooterConstants.kPitchMaxOutput, ShooterConstants.kPitchMaxOutput
     )
@@ -81,10 +82,10 @@ class Shooter(Subsystem):
     self.pitchMotor.stopMotor()
 
   def intakeCoralCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(0.6))
+    return InstantCommand(lambda: self.rollerMotor.set(0.55))
 
   def outtakeCoralCommand(self, slowdown = False) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(0.5 if slowdown else 0.8))
+    return InstantCommand(lambda: self.rollerMotor.set(0.57 if slowdown else 1))
 
   def intakeAlgaeCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(-1))
@@ -96,7 +97,7 @@ class Shooter(Subsystem):
     return InstantCommand(lambda: self.rollerMotor.set(-1))
 
   def isCoralFilled(self):
-    return self.debouncer.calculate(not self.coralSensor.get()) and self.coralSensorEnabled
+    return (not self.coralSensor.get()) and self.coralSensorEnabled
 
   def setCoralSensorEnabled(self, enabled: bool):
     self.coralSensorEnabled = enabled

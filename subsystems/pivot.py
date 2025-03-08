@@ -2,6 +2,8 @@ import math
 from commands2 import Subsystem, Command, InstantCommand
 from wpilib import SmartDashboard, DutyCycleEncoder
 from phoenix6.hardware import TalonFX
+from phoenix6.configs import TalonFXConfiguration
+from phoenix6.controls import StaticBrake
 from rev import SparkMax, SparkMaxConfig, ClosedLoopConfig
 from constants import PivotConstants
 
@@ -30,7 +32,7 @@ class Pivot(Subsystem):
 
     cfg_pitch.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
     cfg_pitch.closedLoop.P(PivotConstants.kPPitchMotor)
-    cfg_pitch.closedLoop.D(0.01)
+    cfg_pitch.closedLoop.D(0.05)
     cfg_pitch.closedLoop.outputRange(
       -PivotConstants.kPitchMaxOutput, PivotConstants.kPitchMaxOutput
     )
@@ -58,19 +60,19 @@ class Pivot(Subsystem):
     self.pitchMotor.stopMotor()
 
   def intakeCoralCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(0.4))
+    return InstantCommand(lambda: self.rollerMotor.set(0.35))
   
   def outtakeCoralCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(-0.5))
 
   def intakeAlgaeCommand(self) -> Command:
-    return InstantCommand(lambda: self.rollerMotor.set(-0.8))
+    return InstantCommand(lambda: self.rollerMotor.set(-0.4))
 
   def outtakeAlgaeCommand(self) -> Command:
     return InstantCommand(lambda: self.rollerMotor.set(1))
 
   def stopRoller(self):
-    self.rollerMotor.stopMotor()
+    self.rollerMotor.set_control(StaticBrake())
 
   def stop(self):
     self.stopPitch()

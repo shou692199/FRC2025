@@ -1,4 +1,4 @@
-from commands2 import SequentialCommandGroup, WaitCommand
+from commands2 import SequentialCommandGroup, WaitCommand, InstantCommand
 from subsystems import Shooter, Pivot
 
 class ShootAlgae(SequentialCommandGroup):
@@ -9,6 +9,7 @@ class ShootAlgae(SequentialCommandGroup):
     self.pivot = pivot
     self.addCommands(
       shooter.outtakeAlgaeCommand(),
+      InstantCommand(lambda: pivot.setGoalPitch(130)),
       pivot.outtakeAlgaeCommand(),
       WaitCommand(2)
     )

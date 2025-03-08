@@ -10,7 +10,7 @@ class GotoPreset(SequentialCommandGroup):
     super().__init__()
 
     self.addCommands(
-      SetPivotPitch(pivot, 165).withTimeout(2),
+      SetPivotPitch(pivot, 175).withTimeout(2),
       SetShooterPitch(shooter, 0).withTimeout(2),
       SetElevatorHeight(elevator, preset.value[0]).withTimeout(3),
       SetPivotPitch(pivot, preset.value[1]).withTimeout(2),
