@@ -1,6 +1,6 @@
 from wpilib import SmartDashboard, DriverStation
 from wpimath.units import degreesToRadians
-from commands import AutoAlign, ClimbJoystick, DriveJoystick, GotoPreset, IntakeAlgae, IntakeCoral
+from commands import AutoAlign, ClimbJoystick, DriveJoystick, XSpeed, GotoPreset, IntakeAlgae, IntakeCoral
 from commands import ScoreCoral, ScoreCoralSlow, ShootAlgae
 from commands2 import Command, InstantCommand, WaitCommand, ParallelCommandGroup, SequentialCommandGroup
 from commands2.button import CommandXboxController
@@ -207,9 +207,11 @@ class RobotContainer:
     if selected == "" or not self.poseEstimator.isVisionAvailable(): return None
     keyMapping = {"1": "AB", "2": "CD", "3": "EF", "4": "GH", "5": "IJ", "6": "KL"}
     autoCommand = SequentialCommandGroup(
-      #GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),
-      self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(selected[0]))
-      #ScoreCoralSlow(self.shooter, self.pivot)
+      GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.SCORE_L1),
+      self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(selected[0])),
+      XSpeed(self.swerve, 0.5).withTimeout(1),
+      ScoreCoralSlow(self.shooter, self.pivot),
+      XSpeed(self.swerve, -0.3).withTimeout(0.7),
     )
     if len(selected) == 1:
       return autoCommand
@@ -225,7 +227,9 @@ class RobotContainer:
             ).beforeStarting(WaitCommand(1)),
             self.getPathfindThenFollowPathCommand("Reef " + keyMapping.get(s))
           ),
+          XSpeed(self.swerve, 0.5).withTimeout(1),
           IntakeAlgae(self.shooter, self.pivot).withTimeout(2),
+          XSpeed(self.swerve, -0.3).withTimeout(0.7),
           ParallelCommandGroup(
             GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.PROCCESSOR)
             .beforeStarting(WaitCommand(1)),
@@ -239,7 +243,7 @@ class RobotContainer:
   def getPathfindThenFollowPathCommand(self, pathName: str):
     path = PathPlannerPath.fromPathFile(pathName)
     constraints = PathConstraints(
-      2.5, 2,
+      3, 2,
       degreesToRadians(540), degreesToRadians(360)
     )
     return AutoBuilder.pathfindThenFollowPath(path, constraints)

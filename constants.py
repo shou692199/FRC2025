@@ -112,7 +112,7 @@ class MotionPresets(Enum):
   PROCCESSOR = (0.1, 165, 0)
   SCORE_L1 = (0.25, 165, 60)
   SCORE_L2 = (0.52, 165, 50)
-  SCORE_L3 = (0.88, 165, 54)
+  SCORE_L3 = (0.86, 165, 58)
   REEF_L2 = (0.55, 165, 0)
   REEF_L3 = (0.90, 165, 0)
   HOME = (0, 165, 0)

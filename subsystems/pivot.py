@@ -18,6 +18,10 @@ class Pivot(Subsystem):
     self.pitchAbsEncoder = DutyCycleEncoder(10, 360, PivotConstants.kPitchAbsoluteEncoderOffset)
     self.pitchClosedLoopController = self.pitchMotor.getClosedLoopController()
 
+    cfg = TalonFXConfiguration()
+    cfg.current_limits.stator_current_limit = 120
+    self.rollerMotor.configurator.apply(cfg)
+
     self.configurePitchParam()
     self.resetEncoders()
 

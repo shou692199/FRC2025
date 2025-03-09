@@ -71,13 +71,13 @@ class PoseEstimator(commands2.Subsystem):
       distance = (cameraToTarget.x**2 + cameraToTarget.y**2)**0.5
       chassisSpeeds = self.swerve.getChassisSpeeds()
       absSpeed = abs((chassisSpeeds.vx**2 + chassisSpeeds.vy**2)**0.5)
-      if singleTarget.getPoseAmbiguity() <= 0.2 and distance <= 3.5 and absSpeed <= 0.3:
+      if singleTarget.getPoseAmbiguity() <= 0.3 and distance <= 4 and absSpeed <= 0.3:
         self.poseEstimator.addVisionMeasurement(
           estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds)
         self.visionTimestamp = Timer.getTimestamp()
 
   def periodic(self):
-    self.addVisionMeasurement(self.highPhotonPoseEstimator.update())
+    #self.addVisionMeasurement(self.highPhotonPoseEstimator.update())
     self.addVisionMeasurement(self.lowPhotonPoseEstimator.update())
     self.poseEstimator.update(self.swerve.getRawRotation2d(), self.swerve.getModulePositions())
     self.posePublisher.set(self.getPose())

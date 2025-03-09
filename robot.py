@@ -13,7 +13,7 @@ class MyRobot(TimedCommandRobot):
     self.driverJoystick = self.container.driverJoystick
 
     self.timer = Timer()
-    Trigger(lambda: self.timer.hasElapsed(110/7)).onTrue(
+    Trigger(lambda: self.timer.hasElapsed(85)).onTrue(
       SequentialCommandGroup(
         InstantCommand(
           lambda: self.driverJoystick.setRumble(XboxController.RumbleType.kBothRumble, 1)
@@ -35,12 +35,6 @@ class MyRobot(TimedCommandRobot):
   def teleopInit(self):
     self.swerve.zeroHeading(self.poseEstimator.getRotation2d())
     self.timer.restart()
-
-  def teleopPeriodic(self):
-    self.container.driverJoystick.setRumble(
-      XboxController.RumbleType.kBothRumble,
-      1 if 25 < Timer.getMatchTime() < 30 else 0
-    )
 
   def disabledInit(self):
     self.container.stopAll()

@@ -1,6 +1,7 @@
 from .autoalign import AutoAlign
 from .climbjoystick import ClimbJoystick
 from .drivejoystick import DriveJoystick
+from .xspeed import XSpeed
 from .gotopreset import GotoPreset
 from .intakealgae import IntakeAlgae
 from .intakecoral import IntakeCoral
