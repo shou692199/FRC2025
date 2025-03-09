@@ -1,3 +1,4 @@
+from .autoalign import AutoAlign
 from .climbjoystick import ClimbJoystick
 from .drivejoystick import DriveJoystick
 from .gotopreset import GotoPreset

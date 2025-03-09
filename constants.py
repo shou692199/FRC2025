@@ -129,13 +129,13 @@ class AutoConstants:
   kPTranslation = 1.7
   kPRotation = 3.5
 
-class ChaseTagConstants:
-  kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 2
-  kMaxAngularSpeedRadiansPerSecond = DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond / 5
-  kMaxAccelerationMetersPerSecondSquared = 3
-  kMaxAngularAccelerationRadiansPerSecondSquared = math.pi / 2
-  kPXController = 0.6
-  kPYController = 0.6
+class AutoAlignConstants:
+  kMaxSpeedMetersPerSecond = 3
+  kMaxAngularSpeedRadiansPerSecond = degreesToRadians(540)
+  kMaxAccelerationMetersPerSecondSquared = 2
+  kMaxAngularAccelerationRadiansPerSecondSquared = math.tau
+  kPXController = 1.5
+  kPYController = 1.5
   kPOController = 1.5
 
   kXControllerConstraints = TrapezoidProfile.Constraints(
@@ -148,11 +148,12 @@ class ChaseTagConstants:
     kMaxAngularSpeedRadiansPerSecond, kMaxAngularAccelerationRadiansPerSecondSquared
   )
 
-  kXToleranceMeters = 0.1
-  kYToleranceMeters = 0.1
-  kOToleranceRadians = degreesToRadians(3)
+  kXToleranceMeters = 0.02
+  kYToleranceMeters = 0.015
+  kOToleranceRadians = degreesToRadians(2)
 
-  kTag2GoalTransform = Transform3d(1.5, 0, 0, Rotation3d(0, 0, 0))
+  kLeftReefTransform = Transform3d(0.35, 0.10, 0, Rotation3d(0, 0, math.pi))
+  kRightReefTransform = Transform3d(0.35, -0.10, 0, Rotation3d(0, 0, math.pi))
 
 class OIConstants:
   kDriverControllerPort = 0

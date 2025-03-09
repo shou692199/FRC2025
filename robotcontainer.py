@@ -1,6 +1,6 @@
 from wpilib import SmartDashboard, DriverStation
 from wpimath.units import degreesToRadians
-from commands import ClimbJoystick, DriveJoystick, GotoPreset, IntakeAlgae, IntakeCoral
+from commands import AutoAlign, ClimbJoystick, DriveJoystick, GotoPreset, IntakeAlgae, IntakeCoral
 from commands import ScoreCoral, ScoreCoralSlow, ShootAlgae
 from commands2 import Command, InstantCommand, WaitCommand, ParallelCommandGroup, SequentialCommandGroup
 from commands2.button import CommandXboxController
@@ -114,6 +114,18 @@ class RobotContainer:
         GotoPreset(self.elevator, self.shooter, self.pivot, MotionPresets.CORAL_STATION)
       )
     )
+    self.driverJoystick.y().and_(self.driverJoystick.povLeft()).whileTrue(
+      SequentialCommandGroup(
+        InstantCommand(lambda: self.poseEstimator.setVisionEnabled(False)),
+        AutoAlign(self.swerve, self.poseEstimator.getPose, self.shouldFlipPath, True)
+      )
+    ).onFalse(InstantCommand(lambda: self.poseEstimator.setVisionEnabled(True)))
+    self.driverJoystick.y().and_(self.driverJoystick.povRight()).whileTrue(
+      SequentialCommandGroup(
+        InstantCommand(lambda: self.poseEstimator.setVisionEnabled(False)),
+        AutoAlign(self.swerve, self.poseEstimator.getPose, self.shouldFlipPath, False)
+      )
+    ).onFalse(InstantCommand(lambda: self.poseEstimator.setVisionEnabled(True)))
     self.driverJoystick.a().onTrue(InstantCommand(self.swerve.stop, self.swerve))
 
     self.operatorJoystick.start().onTrue(
